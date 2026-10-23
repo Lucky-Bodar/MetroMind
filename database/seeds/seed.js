@@ -11,13 +11,22 @@ const { Pool } = require("pg");
 const path     = require("path");
 require("dotenv").config({ path: path.join(__dirname, "../../env/.env") });
 
-const pool = new Pool({
-  host:     process.env.DB_HOST,
-  port:     parseInt(process.env.DB_PORT || "5432"),
-  database: process.env.DB_NAME,
-  user:     process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-});
+const poolConfig = process.env.DATABASE_URL
+  ? {
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.DATABASE_URL.includes("neon.tech") || process.env.DATABASE_URL.includes("supabase")
+        ? { rejectUnauthorized: false }
+        : false,
+    }
+  : {
+      host:     process.env.DB_HOST || "localhost",
+      port:     parseInt(process.env.DB_PORT || "5432"),
+      database: process.env.DB_NAME || "metromind_db",
+      user:     process.env.DB_USER || "metromind_user",
+      password: process.env.DB_PASSWORD || "",
+    };
+
+const pool = new Pool(poolConfig);
 
 // Sample corridors for seeding
 const CORRIDORS = [
