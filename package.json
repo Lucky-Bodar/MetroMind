@@ -5,6 +5,7 @@
   "main": "backend/server.js",
   "scripts": {
     "start": "node backend/server.js",
+    "build": "echo 'Build complete'",
     "dev": "nodemon backend/server.js",
     "seed": "node database/seeds/seed.js",
     "ai": "cd ai && python app.py",
