@@ -148,11 +148,11 @@ function initMap(){
  const G=L.GridLayer.extend({createTile(){const t=document.createElement("canvas");t.width=t.height=256;const x=t.getContext("2d");x.fillStyle=BCOL[CB];x.fillRect(0,0,256,256);x.strokeStyle=CB==="normal"?"rgba(15,27,45,.07)":"rgba(255,255,255,.06)";x.strokeRect(.5,.5,255,255);return t}});
  BL.grid=new G({zIndex:1});
  const tl=(u,o)=>L.tileLayer(u,Object.assign({maxZoom:19,zIndex:2},o));
- BL.normal=tl("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{subdomains:"abcd",attribution:"© OpenStreetMap · © CARTO"});
- BL.night=tl("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{subdomains:"abcd",attribution:"© OpenStreetMap · © CARTO"});
- BL.sat=L.layerGroup([tl("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{attribution:"Imagery © Esri"}),tl("https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",{subdomains:"abcd",zIndex:3})]);
+ BL.normal=tl("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",{attribution:"Esri, HERE, Garmin"});
+ BL.night=L.layerGroup([tl("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",{attribution:"Esri, HERE, Garmin"}),tl("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}",{zIndex:3})]);
+ BL.sat=L.layerGroup([tl("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{attribution:"Imagery © Esri"}),tl("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",{zIndex:3})]);
  const te=()=>{if(!tWarn){tWarn=true;toast("Map tiles need an internet connection. Routes still work on the offline grid.")}};
- [BL.normal,BL.night].forEach(l=>l.on("tileerror",te));BL.sat.eachLayer(l=>l.on("tileerror",te));
+ [BL.normal].forEach(l=>l.on("tileerror",te));[BL.night,BL.sat].forEach(g=>g.eachLayer(l=>l.on("tileerror",te)));
  BL.grid.addTo(MAP);BL.normal.addTo(MAP);OV=L.layerGroup().addTo(MAP)}
 function bPill(){const b=document.querySelector("#bsw button.on"),p=$("bpill");p.style.left=b.offsetLeft+"px";p.style.width=b.offsetWidth+"px"}
 function setBase(k){if(k===CB)return;[BL.normal,BL.night,BL.sat].forEach(l=>MAP.hasLayer(l)&&MAP.removeLayer(l));CB=k;BL[k].addTo(MAP);BL.grid.redraw();$("mapc").dataset.b=k;document.querySelectorAll("#bsw button").forEach(b=>b.classList.toggle("on",b.dataset.b===k));bPill();drawMap(RES,true);toast({normal:"Normal map",night:"Night mode",sat:"Satellite view"}[k])}
