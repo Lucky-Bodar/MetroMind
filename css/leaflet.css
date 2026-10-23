@@ -1,3 +1,5 @@
+/* Leaflet 1.9.4 Core Styles */
+/* required styles */
 
 .leaflet-pane,
 .leaflet-tile,
@@ -657,4 +659,3 @@ svg.leaflet-image-layer.leaflet-interactive path {
 		-webkit-print-color-adjust: exact;
 		print-color-adjust: exact;
 		}
-	}

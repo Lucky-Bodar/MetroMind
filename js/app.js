@@ -1,20 +1,3 @@
-/**
- * ====================================================================
- * MetroMind — AI-Driven Traffic Optimisation for Bengaluru
- * Frontend Core Application (v3 with Leaflet & Real-Time IST Engine)
- * ====================================================================
- * Design Project – I (E1CSA313) · Alliance University · Sem 5
- * 
- * Team:
- *   1. Akshat Kishore        - 2411021060556
- *   2. Arya Utkarsh          - 2411021060543
- *   3. Bodar Lucky Kumar     - 2411021060517
- *   4. D. Sai Shikhar Achari - 2411021060542
- * Mentor: Dr. C. Viji
- * ====================================================================
- */
-
-
 const $=id=>document.getElementById(id);
 const RAW=`MG Road|12.9756|77.6070|1.1
 Majestic (KSR Station)|12.9779|77.5726|1.1
@@ -129,9 +112,9 @@ function ttiE(e,h,c,live){const A=N[e.a],B=N[e.to],w=(A.w+B.w)/2*(e.art?1:.72),w
  let t=1+w*(.95*(g(h,8.8,1.25)*k1+g(h,18.3,1.5)*k2)+.15*g(h,13,2.5))*wk;const W={clear:[0,0],rain:[.25,.05],heavy:[.5,.12]}[c.wx];t=1+(t-1)*(1+W[0])+W[1];
  if(c.inc===e.key)t+=.6;t*=live?1+.65*(H(e.key+Math.floor(h*12))-.5)*.2:1.03;return Math.max(1,t)}
 const eMin=(e,h,c,l)=>e.len/(e.fs/ttiE(e,h,c,l))*60;
-function path(s,d,st,c,live,pen){const n=N.length,D=Array(n).fill(1e9),P=Array(n).fill(null),F=Array(n).fill(false);D[s]=0;
+function path(s,d,st,c,live,pen,ban){const n=N.length,D=Array(n).fill(1e9),P=Array(n).fill(null),F=Array(n).fill(false);D[s]=0;
  for(;;){let u=-1,b=1e9;for(let i=0;i<n;i++)if(!F[i]&&D[i]<b){b=D[i];u=i}if(u<0||u===d)break;F[u]=true;
-  for(const e of AD[u].values()){const m=eMin(e,st+D[u]/60,c,live)*(pen&&pen.has(e.key)?1.7:1);if(D[u]+m<D[e.to]){D[e.to]=D[u]+m;P[e.to]=e}}}
+  for(const e of AD[u].values()){if(ban&&ban.has(e.key))continue;const m=eMin(e,st+D[u]/60,c,live)*(pen&&pen.has(e.key)?1.7:1);if(D[u]+m<D[e.to]){D[e.to]=D[u]+m;P[e.to]=e}}}
  if(!P[d])return null;const es=[];for(let v=d;v!==s;){const e=P[v];es.unshift(e);v=e.a}return es}
 function evalP(es,st,mode,c,live,prim){let clk=st,tot=0,fr=0,dist=0,ok=true,rows=[];const ex=prim?prim.rows.reduce((a,r)=>a+r.t-1,0)/prim.rows.length:0;
  for(const e of es){const t=ttiE(e,clk,c,live),mins=e.len/(e.fs/t)*60,fm=e.len/e.fs*60;let sp=0;if(prim&&!prim.keys.has(e.key)){sp=cong(t+.08*ex*2.5);if(sp>75)ok=false}
@@ -155,16 +138,16 @@ function initMap(){
  [BL.normal].forEach(l=>l.on("tileerror",te));[BL.night,BL.sat].forEach(g=>g.eachLayer(l=>l.on("tileerror",te)));
  BL.grid.addTo(MAP);BL.normal.addTo(MAP);OV=L.layerGroup().addTo(MAP)}
 function bPill(){const b=document.querySelector("#bsw button.on"),p=$("bpill");p.style.left=b.offsetLeft+"px";p.style.width=b.offsetWidth+"px"}
-function setBase(k){if(k===CB)return;[BL.normal,BL.night,BL.sat].forEach(l=>MAP.hasLayer(l)&&MAP.removeLayer(l));CB=k;BL[k].addTo(MAP);BL.grid.redraw();$("mapc").dataset.b=k;document.querySelectorAll("#bsw button").forEach(b=>b.classList.toggle("on",b.dataset.b===k));bPill();drawMap(RES,true);toast({normal:"Normal map",night:"Night mode",sat:"Satellite view"}[k])}
+function setBase(k){if(k===CB)return;const mw=$("mapw");mw.style.opacity=.2;setTimeout(()=>mw.style.opacity=1,450);[BL.normal,BL.night,BL.sat].forEach(l=>MAP.hasLayer(l)&&MAP.removeLayer(l));CB=k;BL[k].addTo(MAP);BL.grid.redraw();$("mapc").dataset.b=k;document.querySelectorAll("#bsw button").forEach(b=>b.classList.toggle("on",b.dataset.b===k));bPill();drawMap(RES,true);toast({normal:"Normal map",night:"Night mode",sat:"Satellite view"}[k])}
 function nClick(n){if(!SEL.src||(SEL.src&&SEL.dst))pick("src",n),SEL.dst=null,$("dst").value="",$("dst").classList.remove("ok");else pick("dst",n);toast((SEL.dst?"Destination":"Source")+" set: "+n.n)}
 function fitBox(es){if(!es.length)return[];return L.latLngBounds(es.flatMap(e=>[[N[e.a].lat,N[e.a].lng],[N[e.to].lat,N[e.to].lng]]))}
 function zoomTo(t){if(!MAP)return;MAP.invalidateSize();Array.isArray(t)?MAP.flyTo([12.97,77.62],11,{duration:1.2}):MAP.flyToBounds(t,{padding:[90,90],maxZoom:14,duration:1.2})}
 function drawMap(r,q){if(!MAP)return;cancelAnimationFrame(VR);OV.clearLayers();const dk=CB!=="normal",ll=n=>[n.lat,n.lng],sn=n=>n.n.split(" (")[0];
- const seen=new Set();AD.forEach(m=>m.forEach(e=>{if(e.art&&!seen.has(e.key)){seen.add(e.key);L.polyline([ll(N[e.a]),ll(N[e.to])],{color:dk?"#9db8de":"#5b7aa6",weight:3,opacity:.55,interactive:false}).addTo(OV)}}));
+ const seen=new Set();AD.forEach(m=>m.forEach(e=>{if(e.art&&!seen.has(e.key)){seen.add(e.key);L.polyline([ll(N[e.a]),ll(N[e.to])],{color:CB==="sat"?"#fff":dk?"#7f9cc6":"#5b7aa6",weight:3,opacity:CB==="sat"?.5:.55,interactive:false}).addTo(OV)}}));
  const onR=new Set(r?r.es.flatMap(e=>[N[e.a].n,N[e.to].n]):[]);
  N.forEach(n=>{const on=onR.has(n.n);if(SEL.src===n||SEL.dst===n)return;const m=L.circleMarker(ll(n),{radius:on?5.5:3.8,color:dk?"#fff":"#0b1730",weight:1.5,fillColor:on?"#fff":(dk?"#9fb8d9":"#1d4f91"),fillOpacity:1}).addTo(OV);m.bindTooltip(sn(n),{className:"lt",direction:"top",offset:[0,-4],permanent:!!(on&&r&&onR.size<=9)});m.on("click",()=>nClick(n))});
  if(r){if(r.alt){L.polyline(r.alt.es.map(e=>ll(N[e.a])).concat([ll(N[r.alt.es[r.alt.es.length-1].to])]),{color:"#a78bfa",weight:4,dashArray:"9 9",opacity:.95,className:q?"":"alt"}).addTo(OV).bindTooltip("Alternate route",{className:"lt",sticky:true})}
-  r.es.forEach((e,i)=>{const pts=[ll(N[e.a]),ll(N[e.to])],w=r.cur.rows[i],cg=w.cg;L.polyline(pts,{color:"#000",weight:11,opacity:dk?.45:.22,interactive:false}).addTo(OV);const p=L.polyline(pts,{color:col(cg),weight:7,opacity:1,lineCap:"round",className:q?"rs":"rt"}).addTo(OV),el=p.getElement();if(el&&!q){el.setAttribute("pathLength","1");el.style.animationDelay=i*.12+"s"}p.bindTooltip(sn({n:w.from})+" → "+sn({n:w.to})+": "+cg+"% "+lab(cg),{className:"lt",sticky:true})});
+  r.es.forEach((e,i)=>{const pts=[ll(N[e.a]),ll(N[e.to])],w=r.cur.rows[i],cg=w.cg;L.polyline(pts,{color:CB==="sat"?"#fff":"#000",weight:11,opacity:CB==="sat"?.9:dk?.55:.22,interactive:false}).addTo(OV);const p=L.polyline(pts,{color:col(cg),weight:7,opacity:1,lineCap:"round",className:q?"rs":"rt"}).addTo(OV),el=p.getElement();if(el&&!q){el.setAttribute("pathLength","1");el.style.animationDelay=i*.12+"s"}p.bindTooltip(sn({n:w.from})+" → "+sn({n:w.to})+": "+cg+"% "+lab(cg),{className:"lt",sticky:true})});
   const b=r.bn;if(b&&b.cg>=30){const A=N[b.e.a],B=N[b.e.to];L.marker([(A.lat+B.lat)/2,(A.lng+B.lng)/2],{icon:L.divIcon({className:"",html:'<div class="bnm"></div>',iconSize:[22,22]}),zIndexOffset:500,interactive:false}).addTo(OV).bindTooltip("Bottleneck: "+sn(A)+" → "+sn(B),{className:"lt",permanent:true,direction:"right",offset:[14,0]})}
   const P=[ll(N[r.es[0].a])].concat(r.es.map(e=>ll(N[e.to]))),cum=[0];for(let i=1;i<P.length;i++)cum.push(cum[i-1]+Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]));const T=cum[cum.length-1],PH=[0,.33,.66];
   const vs=PH.map(()=>L.marker(P[0],{icon:L.divIcon({className:"",html:'<div class="veh"></div>',iconSize:[14,14]}),interactive:false,zIndexOffset:900}).addTo(OV)),D=Math.max(7000,r.es.length*1100),t0=performance.now()+1500;
@@ -205,7 +188,7 @@ const RD=(()=>{const cv=$("road"),cx=cv.getContext("2d"),hero=$("top"),CC=["#ff5
 function v3init(){tick();sync();setInterval(tick,1000);setInterval(sync,5000);RD.start();
  let ly=scrollY,lt=performance.now();const hl=$("hl"),pg=$("pgi"),pc=$("pgc");
  const onS=()=>{const y=scrollY,t=performance.now();VEL=(y-ly)/Math.max(8,t-lt)*1000;ly=y;lt=t;const mx=Math.max(1,document.documentElement.scrollHeight-innerHeight),p=Math.min(1,y/mx);pg.style.width=p*100+"%";pc.style.left="calc("+p*100+"% - "+p*24+"px)";hl.style.transform="translateY("+Math.min(y,700)*.16+"px)";hl.style.opacity=Math.max(0,1-y/650);
-  if($("plan").classList.contains("on")){const r=$("mapsec").getBoundingClientRect(),m=r.top<innerHeight*.45,bs=[...document.querySelectorAll("#nav button")],b=m?bs[1]:bs[0];if(!b.classList.contains("on")){bs.forEach(x=>x.classList.toggle("on",x===b));pillTo(b)}}};
+  };
  addEventListener("scroll",onS,{passive:true});onS();
  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.12});document.querySelectorAll(".sr").forEach(el=>io.observe(el));
  $("bsw").onclick=e=>{const b=e.target.closest("button");if(b)setBase(b.dataset.b)};bPill();
@@ -244,12 +227,13 @@ function compute(anim){const [hh,mm]=$("tm").value.split(":").map(Number),st=hh+
  let incTxt="";if($("inc").checked){const m=es[Math.floor(es.length/2)];C.inc=m.key;incTxt=N[m.a].n+" → "+N[m.to].n;es=path(s,d,st,C,live,null)}
  const cur=evalP(es,st,mode,C,live),prim={rows:cur.rows,keys:cur.keys};
  const pen=new Set(cur.keys);let ae=path(s,d,st,C,live,pen),alt=null;if(ae&&ae.some(e=>!cur.keys.has(e.key))){const r=evalP(ae,st,mode,C,live,prim);alt={es:ae,r}}
+ if(!alt){const mid=cur.rows[Math.floor(cur.rows.length/2)].e.key;for(const k of [mid,...cur.keys]){const a2=path(s,d,st,C,live,null,new Set([k]));if(a2&&a2.some(e=>!cur.keys.has(e.key))){alt={es:a2,r:evalP(a2,st,mode,C,live,prim)};break}}}
  const cands=[];for(const off of[-90,-60,-45,-30,-15,15,30,45,60,90]){const s2=st+off/60;if(s2<5||s2>22)continue;cands.push({off:Math.abs(off),type:"Departure time",tm:s2,label:`Leave ${off<0?-off+" min earlier":off+" min later"} (${fmt(s2)})`,r:evalP(es,s2,mode,C,false)})}
  if(alt)cands.push({type:"Route",label:"Use alternate route (dashed on map)",r:alt.r});
  Object.keys(MODE).forEach(m=>{if(m!==mode)cands.push({type:"Mode",rec:m==="bus",label:"Switch to "+MODE[m].toLowerCase(),r:evalP(es,st,m,C,live)})});
  const valid=cands.filter(x=>x.r.ok&&x.rec!==false),top=valid.reduce((a,b)=>!a||b.r.tot<a.r.tot?b:a,null),tS=top?cur.tot-top.r.tot:0,best=tS>0?valid.filter(x=>cur.tot-x.r.tot>=.7*tS).sort((a,b)=>(a.off||0)-(b.off||0)||a.r.tot-b.r.tot)[0]:null;
  const bn=cur.rows.reduce((a,b)=>b.mins-b.fm>a.mins-a.fm?b:a);
- RES={es,cur,alt,cands,best,save:best?cur.tot-best.r.tot:0,bn,st,mode,live,incTxt,s,d};LAST=RES;render(anim)}
+ RES={routes:[{es,r:cur}].concat(alt?[{es:alt.es,r:alt.r}]:[]),sel:0,es,cur,alt,cands,best,save:best?cur.tot-best.r.tot:0,bn,st,mode,live,incTxt,s,d};LAST=RES;render(anim)}
 const cnt=(el,to,dec=0,suf="")=>{const t0=performance.now();const f=n=>{const k=Math.min(1,(n-t0)/1100),v=to*(1-Math.pow(1-k,3));el.textContent=v.toFixed(dec)+suf;if(k<1)requestAnimationFrame(f)};requestAnimationFrame(f)};
 function reveal(root){root.querySelectorAll(".rv").forEach((el,i)=>{el.style.setProperty("--i",i);el.classList.remove("rv-go");void el.offsetWidth;el.classList.add("rv-go")})}
 function render(anim){const R=RES,cur=R.cur,mode=R.mode,bn=R.bn;$("out").style.display="block";
@@ -270,7 +254,7 @@ function render(anim){const R=RES,cur=R.cur,mode=R.mode,bn=R.bn;$("out").style.d
  $("cmp").querySelectorAll("[data-tm]").forEach(tr=>{if(tr.dataset.tm)tr.onclick=()=>{$("tm").value=fmt(+tr.dataset.tm);run(false)}});
  const ne=R.es.length;$("trace").innerHTML=`<div class="tc rv"><b>D1 Historical data</b><br>Baseline index for ${ne} road sections at ${fmt(R.st)} (hour and weekday pattern).</div><div class="tc rv ${R.live?"":"fb"}"><b>D3 Live feed</b><br>${R.live?"Current 5-minute slot blended in (65% live, 35% baseline). Other departure times use D1 only.":"Not available. Fallback: D1 patterns corrected by D2 trip times (×1.03)."}</div><div class="tc rv"><b>D4 Road network &amp; weather</b><br>City graph of ${N.length} places, route length ${cur.dist.toFixed(1)} km, weather: ${$("wx").selectedOptions[0].text.toLowerCase()}.</div><div class="tc rv"><b>D2 Commuter trips</b><br>${R.incTxt?"Incident report applied on "+R.incTxt+". ":""}Delay reports explain the bottleneck; your trip joins D2 when saved.</div><div class="tc rv"><b>D5 Corridor summary</b><br>Updated when trips are saved (see Corridor Dashboard).</div>`;
  $("saved").textContent="";reveal($("out"));drawMap(R);zoomTo(fitBox(R.es.concat(R.alt?R.alt.es:[])),1100);
- msumFill(R);pbSet(5)}
+ msumFill(R);ropts();pbSet(5)}
 function chart(){const R=RES,pts=[];for(let h=5;h<=22;h+=.25)pts.push([h,evalP(R.es,h,R.mode,C,false).tot]);const mx=Math.max(...pts.map(p=>p[1]))*1.1,mn=Math.min(...pts.map(p=>p[1]))*.88,W=640,Hh=220,P=38,X=h=>P+(h-5)/17*(W-P-12),Y=v=>Hh-28-(v-mn)/(mx-mn)*(Hh-50);
  let o=`<svg id="csv" viewBox="0 0 ${W} ${Hh}" width="100%"><defs><linearGradient id="ar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14b8a6" stop-opacity=".35"/><stop offset="1" stop-color="#14b8a6" stop-opacity="0"/></linearGradient></defs>`;
  for(let k=0;k<=4;k++){const v=mn+(mx-mn)*k/4;o+=`<line x1="${P}" x2="${W-12}" y1="${Y(v)}" y2="${Y(v)}" stroke="#e8eef3"/><text x="${P-6}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="#5b6b7e">${Math.round(v)}</text>`}
@@ -282,7 +266,7 @@ function chart(){const R=RES,pts=[];for(let h=5;h<=22;h+=.25)pts.push([h,evalP(R
 $("sl").oninput=function(){$("slt").textContent="Departure time: "+fmt(+this.value);const mk=$("mk");if(mk)mk.setAttribute("transform","translate("+(38+(+this.value-5)/17*(640-38-12))+",0)");clearTimeout(this._t);this._t=setTimeout(()=>{$("tm").value=fmt(+this.value);run(false)},350)};
 /* ---------- dashboard ---------- */
 const POPC=c=>.6+H(c)*.6;
-function dash(){const cnt={};TRIPS.forEach(t=>t.corr.forEach(c=>{const k=c+"-"+Math.floor(t.st);cnt[k]=(cnt[k]||0)+1}));const cc={we:false,wx:"clear",inc:""};let tot=0,shown=0,worst={d:0};
+function dash(){cityProfile();rank();const cnt={};TRIPS.forEach(t=>t.corr.forEach(c=>{const k=c+"-"+Math.floor(t.st);cnt[k]=(cnt[k]||0)+1}));const cc={we:false,wx:"clear",inc:""};let tot=0,shown=0,worst={d:0};
  let h=`<div class="heat" style="grid-template-columns:190px repeat(16,1fr)"><div class="h"></div>`+[...Array(16)].map((_,i)=>`<div class="h">${String(i+6).padStart(2,"0")}</div>`).join("");let idx=0;
  CORR.forEach(([nm])=>{const es=[];AD.forEach(m=>m.forEach(e=>{if(e.corr===nm&&e.a<e.to)es.push(e)}));if(!es.length)return;h+=`<div class="rl">${nm}</div>`;
   for(let t=6;t<22;t++){const n=Math.round((2+13*(g(t,8.8,1.2)+g(t,18.3,1.5)))*POPC(nm))+(cnt[nm+"-"+t]||0);tot+=n;const dl=es.reduce((a,e)=>a+e.len/e.fs*60*(ttiE(e,t+.5,cc,false)-1),0)/es.length,tt=1+dl/(es.reduce((a,e)=>a+e.len/e.fs*60,0)/es.length);
@@ -301,8 +285,7 @@ function setup(){ac("src");ac("dst");const bs=[...document.querySelectorAll("#na
  $("ex").onclick=e=>{const c=e.target.closest(".chip");if(!c)return;const x=EX[+c.dataset.i];SEL.src=N.find(n=>n.n===x[0]);SEL.dst=N.find(n=>n.n===x[1]);$("src").value=x[0];$("dst").value=x[1];$("src").classList.add("ok");$("dst").classList.add("ok");$("tm").value="08:30";run(true)};
  $("go").onclick=()=>run(true);["mode","day","wx","live","inc"].forEach(i=>$(i).onchange=()=>{if(SEL.src&&SEL.dst&&RES)run(false)});$("tm").onchange=()=>{if(SEL.src&&SEL.dst&&RES)run(false)};
  $("swap").onclick=()=>{const a=SEL.src,b=SEL.dst;SEL.src=b;SEL.dst=a;$("src").value=b?b.n:"";$("dst").value=a?a.n:"";$("src").classList.toggle("ok",!!b);$("dst").classList.toggle("ok",!!a);drawMap(RES&&0);if(a&&b&&RES)run(false);else drawMap(null)};
- $("loc").onclick=()=>{if(!navigator.geolocation){toast("Location is not available in this browser.");return}navigator.geolocation.getCurrentPosition(p=>{const{latitude:la,longitude:lo}=p.coords;if(la<12.78||la>13.23||lo<77.45||lo>77.82){toast("Your location is outside the Bengaluru area covered.");return}addCustom("src","My location",la,lo)},()=>toast("Location permission was denied."))};
- $("fit").onclick=()=>RES?zoomTo(fitBox(RES.es.concat(RES.alt?RES.alt.es:[]))):toast("Analyse a trip first");$("city").onclick=()=>zoomTo([0,0,MW,MH]);
+  $("fit").onclick=()=>RES?zoomTo(fitBox(RES.es.concat(RES.alt?RES.alt.es:[]))):toast("Analyse a trip first");$("city").onclick=()=>zoomTo([0,0,MW,MH]);
  $("cons").onchange=()=>$("save").disabled=!$("cons").checked;
  $("save").onclick=async()=>{if(!LAST||!$("cons").checked)return;
   const cs=[...new Set(LAST.es.filter(e=>e.art).map(e=>e.corr))];
@@ -314,17 +297,44 @@ function setup(){ac("src");ac("dst");const bs=[...document.querySelectorAll("#na
   $("saved").textContent="✔ Saved to database. See the Corridor Dashboard tab.";$("cons").checked=false;$("save").disabled=true;toast("Trip saved anonymously ("+tId+")")};
  document.addEventListener("click",e=>{const b=e.target.closest(".btn,.swap");if(!b)return;const r=b.getBoundingClientRect(),s=Math.max(r.width,r.height),sp=document.createElement("span");sp.className="rip";sp.style.cssText=`width:${s}px;height:${s}px;left:${e.clientX-r.left-s/2}px;top:${e.clientY-r.top-s/2}px`;b.appendChild(sp);setTimeout(()=>sp.remove(),600)});
  drawMap(null);reveal($("plan"));addEventListener("resize",()=>pillTo(document.querySelector("#nav .on")))}
+
+/* ---------- v4: city profile chart (bars coloured by delay intensity) ---------- */
+let CPWE=0;
+function cityProfile(){const cc={we:!!CPWE,wx:"clear",inc:""},E=[];AD.forEach(m=>m.forEach(e=>{if(e.art&&e.a<e.to)E.push(e)}));
+ const D=[];for(let h=0;h<24;h++){let c=0,dl=0;E.forEach(e=>{const t=ttiE(e,h+.5,cc,false);c+=cong(t);dl+=e.len/e.fs*60*(t-1)});D.push({h,c:Math.round(c/E.length),d:dl/E.length})}
+ const W=720,Hh=250,P=40,T=14,B=30,bw=(W-P-10)/24,Y=v=>T+(Hh-T-B)*(1-v/100),now=Math.floor(ist().h);
+ let o=`<svg viewBox="0 0 ${W} ${Hh}" width="100%" role="img" aria-label="City congestion by hour">`;
+ [0,25,50,75,100].forEach(v=>{o+=`<line x1="${P}" x2="${W-10}" y1="${Y(v)}" y2="${Y(v)}" stroke="#e8eef3"/><text x="${P-6}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="#5b6b7e">${v}%</text>`});
+ [30,55,75].forEach(v=>{o+=`<line x1="${P}" x2="${W-10}" y1="${Y(v)}" y2="${Y(v)}" stroke="${col(v)}" stroke-opacity=".35" stroke-dasharray="3 5"/>`});
+ D.forEach((r,i)=>{const x=P+i*bw+3,w=bw-6,y=Y(r.c),isN=r.h===now&&CPWE===(ist().we?1:0);
+  o+=`<g><rect class="cb" x="${x}" y="${y}" width="${w}" height="${Math.max(2,Hh-B-y)}" rx="5" fill="${col(r.c)}" ${isN?'stroke="#0f1b2d" stroke-width="2.5"':""} style="animation-delay:${i*22}ms"><title>${fmt(r.h)}–${fmt(r.h+1)} · ${r.c}% ${lab(r.c)} · avg delay +${r.d.toFixed(1)} min per section</title></rect><text x="${x+w/2}" y="${y-4}" text-anchor="middle" font-size="10" font-weight="700" fill="#34465c">${r.c}</text>${r.h%3===0?`<text x="${x+w/2}" y="${Hh-10}" text-anchor="middle" font-size="11" fill="#5b6b7e">${String(r.h).padStart(2,"0")}h</text>`:""}</g>`});
+ $("cpc").innerHTML=o+"</svg>";
+ const pk=D.reduce((a,b)=>b.c>a.c?b:a),qt=D.filter(r=>r.h>=1&&r.h<=4).reduce((a,b)=>b.c<a.c?b:a),sv=D.filter(r=>r.c>=75).length,hv=D.filter(r=>r.c>=55).length;
+ $("cpn").innerHTML=`<div><b style="color:${col(pk.c)}">${fmt(pk.h)}–${fmt(pk.h+1)}</b>Busiest hour · ${pk.c}% ${lab(pk.c)}</div><div><b style="color:${col(qt.c)}">${fmt(qt.h)}–${fmt(qt.h+1)}</b>Quietest hour · ${qt.c}% ${lab(qt.c)}</div><div><b>${hv} h</b>of the day at Heavy or worse</div><div><b>+${Math.max(...D.map(r=>r.d)).toFixed(1)} min</b>Peak average delay per section</div>`}
+document.addEventListener("click",e=>{const b=e.target.closest("#cpt button");if(!b)return;CPWE=+b.dataset.we;document.querySelectorAll("#cpt button").forEach(x=>x.classList.toggle("on",x===b));cityProfile()});
+
+function ropts(){const R=RES,b=$("ropts"),rs=R.routes,av=x=>Math.round(x.r.rows.reduce((a,q)=>a+q.cg*q.len,0)/x.r.dist),mn=f=>rs.reduce((m,y,j)=>f(y)<f(rs[m])?j:m,0),ft=mn(x=>x.r.tot),sh=mn(x=>x.r.dist),lc=mn(x=>av(x));
+ b.innerHTML='<h3>'+(rs.length>1?"Two ways to get there. Pick one.":"Only one road link found")+'</h3><div class="rg">'+rs.map((x,i)=>{const r=x.r,vc={};x.es.forEach(e=>{if(e.art)vc[e.corr]=(vc[e.corr]||0)+e.len});const via=Object.entries(vc).sort((a,c)=>c[1]-a[1]).slice(0,2).map(v=>v[0]).join(" + ")||"local roads",a=av(x),tg=[i===ft&&"Fastest",i===sh&&rs.length>1&&"Shortest",i===lc&&rs.length>1&&"Least congested"].filter(Boolean).map(t=>`<em class="tg">${t}</em>`).join("");
+  return `<button class="rc ${i===R.sel?"on":""}" data-r="${i}" style="--rc:${i?"#8b6cf0":"#0e8f82"};--i:${i}"><span class="rn">Route ${i+1}${i===R.sel?" · shown on map":""}</span><span>${tg}</span><b>${Math.round(r.tot)} min</b><small>${r.dist.toFixed(1)} km · arrive ${fmt(r.st+r.tot/60)}</small><small>via ${via}</small><div class="bar"><i style="width:${a}%;background:${col(a)}"></i></div><small>${a}% ${lab(a)} · ${r.ok?"nearby roads OK":"may overload nearby roads"}</small></button>`}).join("")+"</div>";b.classList.add("on");
+ b.onclick=e=>{const c=e.target.closest("[data-r]");if(c)selRoute(+c.dataset.r)}}
+function selRoute(i){const R=RES;if(i===R.sel||!R.routes[i])return;const o=R.routes[1-i];R.sel=i;R.es=R.routes[i].es;R.cur=R.routes[i].r;R.alt=o?{es:o.es,r:o.r}:null;R.bn=R.cur.rows.reduce((a,b)=>b.mins-b.fm>a.mins-a.fm?b:a);render(false);toast("Showing Route "+(i+1))}
+function rank(){const h=+$("hr").value,cc={we:false,wx:"clear",inc:""},rows=[];$("hrt").textContent=fmt(h);CORR.forEach(([nm])=>{const es=[];AD.forEach(m=>m.forEach(e=>{if(e.corr===nm&&e.a<e.to)es.push(e)}));if(es.length)rows.push([nm,Math.round(es.reduce((a,e)=>a+cong(ttiE(e,h+.5,cc,false)),0)/es.length)])});rows.sort((a,b)=>b[1]-a[1]);
+ $("rank").innerHTML=rows.map((r,i)=>`<div class="rk" style="--i:${i}"><span>${r[0]}</span><div class="bar"><i style="width:${r[1]}%;background:${col(r[1])}"></i></div><b style="color:${col(r[1])}">${r[1]}%</b><small>${lab(r[1])}</small></div>`).join("")}
+const STG=[{t:"Collect",d:["D2","D3","D4"],w:"Gathers what is known right now: the trip form, the live 5-minute sensor slot, the road graph and the weather.",o:"One raw trip request"},{t:"Preprocess",d:["D4"],w:"Checks the inputs, snaps both places onto the road graph, aligns time to 5-minute slots and drops personal details.",o:"A clean list of road sections"},{t:"Estimate",d:["D1","D3","D4"],w:"Takes the historical baseline for each section and hour, adjusts for weather and blends in the live feed. Travel time = length ÷ speed.",o:"Minutes and congestion % per section"},{t:"Diagnose",d:["D2","D3"],w:"Ranks sections by delay. The top one is the bottleneck, explained by an incident, rain or peak demand.",o:"The bottleneck and its reason"},{t:"Guide",d:["D1","D2","D5"],w:"Tests other departure times, an alternate route and other modes, and rejects any route that overloads nearby roads.",o:"The best suggestion and minutes saved"}];
+let PT;function stage(k){const x=STG[k];document.querySelectorAll("#stg button").forEach((b,i)=>b.classList.toggle("on",i===k));$("stp").innerHTML=`<div class="stpi"><h3>Step ${k+1}: ${x.t}</h3><p>${x.w}</p><div class="chs">Uses ${x.d.map(d=>`<span>${d}</span>`).join("")}</div><div class="muted">Output: <b>${x.o}</b></div></div>`;document.querySelectorAll("#data tbody tr.clk").forEach(tr=>tr.classList.toggle("hl",x.d.includes(tr.firstElementChild.textContent.trim())));pbSet(k)}
+function wireX(){$("hr").oninput=rank;$("hnow").onclick=()=>{$("hr").value=Math.min(22,Math.max(5,Math.floor(ist().h)));rank()};
+ $("stg").innerHTML=STG.map((s,i)=>`<button data-k="${i}"><i>${i+1}</i>${s.t}</button>`).join("");$("stg").onclick=e=>{const b=e.target.closest("button");if(b){clearInterval(PT);stage(+b.dataset.k)}};stage(0);
+ $("play").onclick=()=>{clearInterval(PT);let k=0;stage(0);PT=setInterval(()=>{k++;if(k>4){clearInterval(PT);return}stage(k)},2400)};rank()}
 function boot(){
   try{v3init()}catch(e){console.error("v3init error:",e)}
   try{setup()}catch(e){console.error("setup error:",e)}
+  try{wireX()}catch(e){console.error("wireX error:",e)}
   try{
     if(typeof L!=="undefined"){
       initMap();
     }else{
-      console.warn("Leaflet (L) pending, retrying...");
       setTimeout(()=>{try{if(typeof L!=="undefined")initMap()}catch(err){console.error("Map init error:",err)}},150);
     }
   }catch(e){console.error("initMap error:",e)}
 }
 if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",boot)}else{boot()}
-
