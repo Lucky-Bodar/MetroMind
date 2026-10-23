@@ -9,6 +9,7 @@
 
 const { Pool } = require("pg");
 const path     = require("path");
+const fs       = require("fs");
 require("dotenv").config({ path: path.join(__dirname, "../../env/.env") });
 
 const poolConfig = process.env.DATABASE_URL
@@ -66,10 +67,21 @@ function randomTrip(i) {
 async function seed() {
   const client = await pool.connect();
   try {
-    console.log("🌱  Seeding MetroMind database…");
+    console.log("🌱  Setting up & seeding MetroMind database…");
 
-    // Clear existing seed data
-    await client.query("DELETE FROM trips WHERE trip_id LIKE 'T-SEED-%'");
+    // 1. Automatically apply schema if not yet initialized
+    try {
+      const schemaSql = fs.readFileSync(path.join(__dirname, "../schema/schema.sql"), "utf8");
+      await client.query(schemaSql);
+      console.log("   ✅  Database schema verified/created successfully");
+    } catch (schemaErr) {
+      console.warn("   ℹ️  Schema notice:", schemaErr.message);
+    }
+
+    // 2. Clear existing seed data
+    try {
+      await client.query("DELETE FROM trips WHERE trip_id LIKE 'T-SEED-%'");
+    } catch {}
 
     // Insert 200 sample trips
     for (let i = 0; i < 200; i++) {

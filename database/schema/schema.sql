@@ -80,14 +80,13 @@ CREATE INDEX IF NOT EXISTS idx_sensor_corridor ON live_sensor_slots (corridor_na
 -- ─────────────────────────────────────────────────────────────
 CREATE MATERIALIZED VIEW IF NOT EXISTS corridor_summary AS
 SELECT
-    unnest(corridors::text[])          AS corridor_name,
-    FLOOR(start_time)::INTEGER         AS hour,
-    COUNT(*)                           AS trip_count,
-    AVG(estimated_time)                AS avg_time_minutes,
+    jsonb_array_elements_text(corridors) AS corridor_name,
+    FLOOR(start_time)::INTEGER           AS hour,
+    COUNT(*)                             AS trip_count,
+    AVG(estimated_time)                  AS avg_time_minutes,
     AVG(estimated_time - (
-        -- subtract free-flow estimate (rough proxy)
         (estimated_time / (1 + GREATEST(0, (start_time - 8) * 0.05)))
-    ))                                 AS avg_delay_minutes,
+    ))                                   AS avg_delay_minutes,
     mode,
     day_type
 FROM trips
