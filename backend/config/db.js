@@ -5,6 +5,19 @@
  * All database queries go through this pool.
  */
 
+const path = require("path");
+const fs = require("fs");
+[
+  path.join(__dirname, "../../.env"),
+  path.join(__dirname, "../.env"),
+  path.join(__dirname, "../../env/.env"),
+  path.join(process.cwd(), ".env"),
+  path.join(process.cwd(), "env/.env"),
+].forEach(p => {
+  if (fs.existsSync(p)) require("dotenv").config({ path: p });
+});
+require("dotenv").config();
+
 const { Pool } = require("pg");
 
 const poolConfig = process.env.DATABASE_URL
@@ -33,10 +46,11 @@ const pool = new Pool(poolConfig);
 // Test connection on startup
 pool.connect((err, client, release) => {
   if (err) {
-    console.log("ℹ️   PostgreSQL not detected (localhost:5432).");
+    console.log("ℹ️   PostgreSQL not connected:", err.message || err);
     console.log("    ⚡ Running in Standalone In-Memory mode — All routing, maps, and APIs work seamlessly!");
   } else {
-    console.log(`✅  Connected to PostgreSQL database (${process.env.DB_NAME || "metromind_db"})`);
+    const target = process.env.DATABASE_URL ? "Neon Cloud PostgreSQL" : (process.env.DB_NAME || "metromind_db");
+    console.log(`✅  Connected to PostgreSQL database (${target})`);
     release();
   }
 });
