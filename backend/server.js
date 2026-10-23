@@ -39,6 +39,7 @@ const NODE_ENV = process.env.NODE_ENV || "development";
 app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false,
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" },
 }));
 app.use(cors({ origin: process.env.FRONTEND_URL || "*" }));
 app.use(express.json());

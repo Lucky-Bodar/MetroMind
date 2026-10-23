@@ -148,7 +148,7 @@ function initMap(){
  const G=L.GridLayer.extend({createTile(){const t=document.createElement("canvas");t.width=t.height=256;const x=t.getContext("2d");x.fillStyle=BCOL[CB];x.fillRect(0,0,256,256);x.strokeStyle=CB==="normal"?"rgba(15,27,45,.07)":"rgba(255,255,255,.06)";x.strokeRect(.5,.5,255,255);return t}});
  BL.grid=new G({zIndex:1});
  const tl=(u,o)=>L.tileLayer(u,Object.assign({maxZoom:19,zIndex:2},o));
- BL.normal=tl("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap contributors"});
+ BL.normal=tl("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{subdomains:"abcd",attribution:"© OpenStreetMap · © CARTO"});
  BL.night=tl("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{subdomains:"abcd",attribution:"© OpenStreetMap · © CARTO"});
  BL.sat=L.layerGroup([tl("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{attribution:"Imagery © Esri"}),tl("https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",{subdomains:"abcd",zIndex:3})]);
  const te=()=>{if(!tWarn){tWarn=true;toast("Map tiles need an internet connection. Routes still work on the offline grid.")}};
