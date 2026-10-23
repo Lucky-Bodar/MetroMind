@@ -304,7 +304,14 @@ function setup(){ac("src");ac("dst");const bs=[...document.querySelectorAll("#na
  $("loc").onclick=()=>{if(!navigator.geolocation){toast("Location is not available in this browser.");return}navigator.geolocation.getCurrentPosition(p=>{const{latitude:la,longitude:lo}=p.coords;if(la<12.78||la>13.23||lo<77.45||lo>77.82){toast("Your location is outside the Bengaluru area covered.");return}addCustom("src","My location",la,lo)},()=>toast("Location permission was denied."))};
  $("fit").onclick=()=>RES?zoomTo(fitBox(RES.es.concat(RES.alt?RES.alt.es:[]))):toast("Analyse a trip first");$("city").onclick=()=>zoomTo([0,0,MW,MH]);
  $("cons").onchange=()=>$("save").disabled=!$("cons").checked;
- $("save").onclick=()=>{if(!LAST||!$("cons").checked)return;const n=TRIPS.length+1,cs=new Set(LAST.es.filter(e=>e.art).map(e=>e.corr));TRIPS.push({id:"T-"+String(400+n*7).padStart(4,"0"),u:"U-"+String(10+n).padStart(3,"0"),r:SEL.src.n.split(" (")[0]+" → "+SEL.dst.n.split(" (")[0],st:LAST.st,m:LAST.mode,tt:LAST.cur.tot,corr:[...cs]});$("saved").textContent="✔ Saved. See the Corridor Dashboard tab.";$("cons").checked=false;$("save").disabled=true;toast("Trip saved anonymously (T-"+String(400+n*7).padStart(4,"0")+")")};
+ $("save").onclick=async()=>{if(!LAST||!$("cons").checked)return;
+  const cs=[...new Set(LAST.es.filter(e=>e.art).map(e=>e.corr))];
+  const payload={source:SEL.src.n.split(" (")[0],destination:SEL.dst.n.split(" (")[0],startTime:LAST.st,mode:LAST.mode,estimatedTime:LAST.cur.tot,corridors:cs,consent:true};
+  let tId="T-"+String(400+(TRIPS.length+1)*7).padStart(4,"0"),uId="U-"+String(10+(TRIPS.length+1)).padStart(3,"0");
+  try{const res=await fetch("/api/trips",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+   const data=await res.json();if(data.success&&data.trip){tId=data.trip.trip_id;uId=data.trip.user_id}}catch(e){console.warn("Using local session save:",e.message)}
+  TRIPS.push({id:tId,u:uId,r:payload.source+" → "+payload.destination,st:LAST.st,m:LAST.mode,tt:LAST.cur.tot,corr:cs});
+  $("saved").textContent="✔ Saved to database. See the Corridor Dashboard tab.";$("cons").checked=false;$("save").disabled=true;toast("Trip saved anonymously ("+tId+")")};
  document.addEventListener("click",e=>{const b=e.target.closest(".btn,.swap");if(!b)return;const r=b.getBoundingClientRect(),s=Math.max(r.width,r.height),sp=document.createElement("span");sp.className="rip";sp.style.cssText=`width:${s}px;height:${s}px;left:${e.clientX-r.left-s/2}px;top:${e.clientY-r.top-s/2}px`;b.appendChild(sp);setTimeout(()=>sp.remove(),600)});
  drawMap(null);reveal($("plan"));addEventListener("resize",()=>pillTo(document.querySelector("#nav .on")))}
 function boot(){
