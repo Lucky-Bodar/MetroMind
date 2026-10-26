@@ -67,6 +67,22 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+/* ── Search Engine Optimization (SEO) & Web Standards ── */
+app.get("/robots.txt", (req, res) => {
+  res.type("text/plain");
+  res.sendFile(path.join(__dirname, "../frontend/robots.txt"));
+});
+
+app.get("/sitemap.xml", (req, res) => {
+  res.type("application/xml");
+  res.sendFile(path.join(__dirname, "../frontend/sitemap.xml"));
+});
+
+app.get("/site.webmanifest", (req, res) => {
+  res.type("application/manifest+json");
+  res.sendFile(path.join(__dirname, "../frontend/site.webmanifest"));
+});
+
 /* ── Fallback: serve frontend SPA ── */
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/index.html"));

@@ -1,0 +1,19 @@
+{
+  "name": "MetroMind — AI Traffic Optimization Bengaluru",
+  "short_name": "MetroMind",
+  "description": "AI-driven spatio-temporal traffic optimization and bottleneck diagnosis across Bengaluru corridors.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B1730",
+  "theme_color": "#0B1730",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["navigation", "travel", "productivity", "utilities"]
+}

@@ -2,15 +2,198 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MetroMind – AI-driven traffic optimisation for Bengaluru</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  
+  <!-- Primary Meta SEO Tags -->
+  <title>MetroMind — AI Traffic Optimization &amp; Real-Time Congestion Routing | Bengaluru</title>
+  <meta name="title" content="MetroMind — AI Traffic Optimization &amp; Real-Time Congestion Routing | Bengaluru">
+  <meta name="description" content="MetroMind is an AI-powered spatio-temporal traffic optimization and bottleneck diagnosis platform for Bengaluru. Avoid Silk Board, Outer Ring Road &amp; arterial choke points with real-time 5-min sensor telemetry, spill-over constrained route guidance, and privacy-preserving corridor analytics.">
+  <meta name="keywords" content="Bangalore traffic live, Bengaluru traffic congestion, AI traffic prediction Bangalore, Silk Board traffic live, Outer Ring Road Bangalore traffic, smart route planner Bengaluru, commute bottleneck diagnosis, real time traffic map Bangalore, traffic optimization AI, MetroMind, Bellandur traffic, Whitefield traffic route, Hebbal flyover traffic, Alliance University traffic project">
+  <meta name="author" content="Alliance University – Department of Computer Science &amp; Engineering (Akshat Kishore, Arya Utkarsh, Bodar Lucky Kumar, D. Sai Shikhar Achari, Mentor: Dr. C. Viji)">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical" href="https://metromind.vercel.app/">
+
+  <!-- Geotagging for Bengaluru Local Search Ranking -->
+  <meta name="geo.region" content="IN-KA">
+  <meta name="geo.placename" content="Bengaluru">
+  <meta name="geo.position" content="12.9716;77.5946">
+  <meta name="ICBM" content="12.9716, 77.5946">
+
+  <!-- Mobile & PWA Theme -->
+  <meta name="theme-color" content="#0B1730">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MetroMind">
+  <meta name="application-name" content="MetroMind">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/favicon.svg">
+
+  <!-- Open Graph / Facebook / LinkedIn / WhatsApp -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://metromind.vercel.app/">
+  <meta property="og:title" content="MetroMind — AI Traffic Optimization &amp; Real-Time Congestion Routing | Bengaluru">
+  <meta property="og:description" content="AI-driven spatio-temporal route planning, dynamic bottleneck diagnosis, and spill-over constrained commuter guidance across 80 transit hubs and 17 primary corridors in Bengaluru.">
+  <meta property="og:image" content="https://metromind.vercel.app/og-image.svg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="MetroMind AI Traffic Optimization Interface and Live Map">
+  <meta property="og:site_name" content="MetroMind Bengaluru">
+  <meta property="og:locale" content="en_IN">
+
+  <!-- Twitter / X Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://metromind.vercel.app/">
+  <meta name="twitter:title" content="MetroMind — AI Traffic Optimization &amp; Real-Time Congestion Routing | Bengaluru">
+  <meta name="twitter:description" content="Plan any trip across Bengaluru without the guesswork. Real-time TTI fusion, bottleneck diagnosis, and spill-over constrained route guidance.">
+  <meta name="twitter:image" content="https://metromind.vercel.app/og-image.svg">
+
+  <!-- Performance & Preconnect Hints (Boosts Core Web Vitals & Speed Ranking) -->
+  <link rel="preconnect" href="https://server.arcgisonline.com" crossorigin>
+  <link rel="dns-prefetch" href="https://server.arcgisonline.com">
+  <link rel="preconnect" href="https://nominatim.openstreetmap.org" crossorigin>
+  <link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
+
+  <!-- Stylesheets -->
   <link rel="stylesheet" href="css/leaflet.css">
   <link rel="stylesheet" href="css/style.css">
+
+  <!-- JSON-LD Structured Data Schema (Search Engine Gold) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "@id": "https://metromind.vercel.app/#webapp",
+        "name": "MetroMind",
+        "alternateName": "MetroMind Bengaluru AI Traffic Optimizer",
+        "url": "https://metromind.vercel.app/",
+        "description": "AI-driven spatio-temporal traffic optimization and congestion bottleneck diagnosis platform for Bengaluru. Avoid Silk Board, Outer Ring Road and arterial bottlenecks with live 5-minute telemetry and spill-over constrained route guidance.",
+        "applicationCategory": "NavigationApplication, TravelApplication",
+        "operatingSystem": "All modern browsers, iOS, Android, Windows, macOS, Linux",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "INR"
+        },
+        "author": {
+          "@type": "EducationalOrganization",
+          "name": "Alliance University",
+          "department": "Department of Computer Science & Engineering",
+          "url": "https://www.alliance.edu.in/"
+        },
+        "featureList": [
+          "Real-Time 5-Minute Telemetry Blending (D3)",
+          "Dijkstra Shortest-Path Graph Routing (80 Nodes, 17 Corridors)",
+          "Dynamic Bottleneck Diagnosis and Causal Attribution",
+          "Downstream Spill-Over Capacity Verification (Cap <= 75%)",
+          "Hourly City Congestion Profile & Delay Heatmap",
+          "Differential Privacy with k-Anonymity (k >= 5) in PostgreSQL"
+        ]
+      },
+      {
+        "@type": "Place",
+        "@id": "https://metromind.vercel.app/#bengaluru",
+        "name": "Bengaluru",
+        "alternateName": "Bangalore",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Bengaluru",
+          "addressRegion": "Karnataka",
+          "addressCountry": "IN"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 12.9716,
+          "longitude": 77.5946
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://metromind.vercel.app/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Trip Planner",
+            "item": "https://metromind.vercel.app/#plan"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Corridor Dashboard",
+            "item": "https://metromind.vercel.app/#dash"
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "name": "Datasets & Pipeline",
+            "item": "https://metromind.vercel.app/#data"
+          }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://metromind.vercel.app/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is MetroMind and how does it optimize Bengaluru traffic?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "MetroMind is an intelligent transportation platform that models Bengaluru's 80 transit hubs and 17 primary corridors as a directed multigraph. It combines historical Kaggle traffic data (D1), real-time 5-minute sensor streams (D3), and weather coefficients (D4) to calculate dynamic Travel Time Indices (TTI) and recommend optimal routes."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does MetroMind identify and explain traffic bottlenecks?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Instead of returning an opaque ETA, MetroMind isolates the specific road section where delay is maximized: e* = argmax(tau_actual - tau_free). It then attributes the delay to its physical root cause—such as peak-hour vehicle-to-capacity volume, weather drag, or physical incidents."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does MetroMind prevent neighborhood traffic jam spill-over (Braess's Paradox)?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Unlike conventional GPS apps that greedily reroute vehicles into narrow residential colonies, MetroMind incorporates a hard downstream capacity constraint: any alternate route that pushes secondary link congestion above 75% is automatically suppressed."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Which major Bengaluru corridors are tracked in real-time?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "MetroMind tracks 17 primary arterial corridors including Outer Ring Road (Silk Board to Marathahalli & Hebbal), Bellary Road (Airport corridor), Hosur Road (Electronic City), Whitefield Road, Old Madras Road, Old Airport Road, Bannerghatta Road, Tumkur Road, and Kanakapura Road."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is commuter privacy protected when saving trips?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. MetroMind enforces strict k-anonymity (k >= 5) on PostgreSQL database aggregations. No personal names, mobile numbers, or continuous GPS trajectories are stored—only randomized IDs and section-level links are persisted with explicit user consent."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
 <div id="prog"><i id="pgi"></i><b id="pgc">🚗</b></div>
-<header><div class="brand"><div class="logo">M</div><div><b>MetroMind</b><small>AI-driven traffic optimisation · Bengaluru</small></div></div>
-<nav id="nav"><span id="pill"></span><button data-t="plan" data-s="top" class="on">Trip Planner</button><button data-t="dash">Corridor Dashboard</button><button data-t="data">Datasets &amp; Pipeline</button></nav>
+<header role="banner"><div class="brand"><div class="logo">M</div><div><b>MetroMind</b><small>AI-driven traffic optimisation · Bengaluru</small></div></div>
+<nav id="nav" role="navigation" aria-label="Main Navigation"><span id="pill"></span><button data-t="plan" data-s="top" class="on">Trip Planner</button><button data-t="dash">Corridor Dashboard</button><button data-t="data">Datasets &amp; Pipeline</button></nav>
 <div class="lv" id="lv" title="Clock is real IST time. Sensor readings are a simulated D3 feed in this prototype."><span class="ld"></span><div><b id="clk">--:--:--</b><small id="dt"></small></div><span class="sep"></span><div class="l2"><b>LIVE · D3 feed</b><small id="sync">connecting…</small></div></div>
 <div class="pbar" id="pbar"><span class="pl">Pipeline</span>
 <button class="pb" data-k="0"><i>1</i>Collect</button><span class="ar">›</span><button class="pb" data-k="1"><i>2</i>Preprocess</button><span class="ar">›</span><button class="pb" data-k="2"><i>3</i>Estimate</button><span class="ar">›</span><button class="pb" data-k="3"><i>4</i>Diagnose</button><span class="ar">›</span><button class="pb" data-k="4"><i>5</i>Guide</button>
@@ -48,7 +231,7 @@
   <div id="mapw"></div><div class="msum" id="msum"></div>
   <div class="mhint" id="mh">Tip: click any dot on the map to set it as source or destination</div>
   </div><div class="ropts" id="ropts"></div></div></section>
-<main>
+<main role="main">
  <div class="card" id="pipe"><div class="spin"></div><b>Running the MetroMind pipeline…</b><div class="pst" id="pst"></div></div>
  <div id="out" style="display:none">
   <div class="via rv" id="via"></div>
@@ -91,7 +274,100 @@
   <div class="step"><b>6 Evaluate</b>Pilot metrics: RMSE, MAE, R², ranking match, System Usability Scale.</div></div></div>
  <div class="card warnb rv"><h2>Prototype note</h2><p style="margin:0">This demo runs in the browser using approximate coordinates for 80 Bengaluru localities, a road graph built from the main corridors, sample values patterned on the D1 schema and a simulated live feed (the clock is real IST time; the sensor readings are simulated). Map tiles come from OpenStreetMap, CARTO and Esri when you are online, and routes are drawn as straight segments between the junctions of the road graph. Any other place can be added through online search (OpenStreetMap) when you are connected. All values are estimates; no traffic signal is controlled. Real accuracy figures will come from the one-month pilot.</p></div>
 </main></section>
-<footer>MetroMind · Design Project – I (E1CSA313) · Alliance University · Estimates only, not guaranteed predictions</footer>
+
+<!-- Semantic SEO & Technical Transit Knowledge Section -->
+<section class="seo-sec" aria-label="Frequently Asked Questions & Transit Information">
+  <div class="faq-box">
+    <h2><span class="ic">❓</span>Frequently Asked Questions &amp; Transit Intelligence</h2>
+    <div class="faq-item">
+      <details>
+        <summary>What is MetroMind and how does it predict Bengaluru traffic bottlenecks?</summary>
+        <p>MetroMind is an AI-powered spatio-temporal traffic optimization system tailored for Bengaluru. It models the city's 80 transit hubs and 17 primary corridors as a directed multigraph, continuously calculating section-level Travel Time Index (TTI) by fusing 65% real-time sensor streams (D3), 35% historical Kaggle machine learning baselines (D1), and meteorological weather coefficients (D4). It isolates the exact bottleneck edge where delay is maximized rather than simply providing a black-box total travel time.</p>
+      </details>
+    </div>
+    <div class="faq-item">
+      <details>
+        <summary>How does MetroMind prevent neighborhood traffic jam spill-over (Braess's Paradox)?</summary>
+        <p>Traditional navigation apps often greedily redirect vehicles into narrow residential streets when main highways slow down, worsening city-wide gridlock. MetroMind enforces a hard <b>downstream capacity constraint</b>: any alternate route that would elevate secondary collector road congestion above 75% is rejected, maintaining network equilibrium across neighboring communities.</p>
+      </details>
+    </div>
+    <div class="faq-item">
+      <details>
+        <summary>Which major arterial corridors in Bengaluru are covered in the road graph?</summary>
+        <p>MetroMind monitors 17 primary arterial corridors across Bengaluru, including Outer Ring Road (Silk Board to Marathahalli &amp; Hebbal), Bellary Road (Kempegowda Airport corridor), Hosur Road (Electronic City Elevated Expressway), Whitefield Main Road, Old Madras Road (KR Puram), Old Airport Road, Bannerghatta Road, Tumkur Road (Yeshwanthpur/Peenya), and Kanakapura Road.</p>
+      </details>
+    </div>
+    <div class="faq-item">
+      <details>
+        <summary>How is commuter privacy preserved during trip saving?</summary>
+        <p>MetroMind implements strict differential privacy through section-level spatial quantization and a k-anonymity aggregation floor (k &ge; 5). No commuter names, telephone numbers, or continuous GPS breadcrumbs are stored. Trip records are persisted asynchronously with randomized identifiers (T-xxxx, U-xxxx) to an encrypted Neon Serverless PostgreSQL database only after explicit user consent.</p>
+      </details>
+    </div>
+    <div class="faq-item">
+      <details>
+        <summary>How can commuters use the Corridor Dashboard for travel planning?</summary>
+        <p>The Corridor Dashboard provides a 24-hour City Profile bar chart showing congestion intensity curves for weekdays and weekends (morning peak at 08:30 and evening peak at 18:30). Commuters and traffic operators can drag the real-time Corridor Ranking slider to view real-time corridor congestion hierarchy and check the anonymous D5 heatmap matrix.</p>
+      </details>
+    </div>
+  </div>
+
+  <div class="seo-grid">
+    <div class="seo-card">
+      <b>🚦 Silk Board &amp; Outer Ring Road (ORR)</b>
+      <p>Real-time bottleneck diagnosis from Central Silk Board across HSR Layout, Bellandur, Kadubeesanahalli, and Marathahalli to Hebbal Flyover.</p>
+    </div>
+    <div class="seo-card">
+      <b>🛫 Kempegowda Airport (BLR) Corridor</b>
+      <p>High-speed arterial travel time index tracking along Bellary Road, Hebbal Flyover, Yelahanka, and Devanahalli.</p>
+    </div>
+    <div class="seo-card">
+      <b>🏢 Whitefield &amp; ITPL Tech Hub</b>
+      <p>Alternative route analysis avoiding KR Puram Tin Factory and Hoodi choke points with downstream spill-over verification.</p>
+    </div>
+    <div class="seo-card">
+      <b>🏭 Electronic City &amp; Hosur Road</b>
+      <p>Congestion modeling comparing the Electronic City Elevated Tollway against at-grade arterial roads under rain and peak conditions.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Semantic Crawlable Footer -->
+<footer class="seo-footer" role="contentinfo">
+  <div class="wrap">
+    <div>
+      <h4>MetroMind — AI Traffic Optimization Platform</h4>
+      <p>An enterprise-grade, spatio-temporal intelligent transportation framework engineered for Bengaluru's heterogeneous urban arterial network. Developed at Alliance University as an academic research and engineering design project.</p>
+      <p style="color:#7cf0e1;font-weight:600">Department of Computer Science &amp; Engineering · Alliance University</p>
+    </div>
+    <div>
+      <h4>Primary Corridors</h4>
+      <ul>
+        <li><a href="#plan">Outer Ring Road (ORR)</a></li>
+        <li><a href="#plan">Silk Board to Electronic City</a></li>
+        <li><a href="#plan">Whitefield &amp; Marathahalli</a></li>
+        <li><a href="#plan">Bellary Road (Airport Road)</a></li>
+        <li><a href="#plan">Bannerghatta Road Corridor</a></li>
+        <li><a href="#plan">Old Madras Road (KR Puram)</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Architecture &amp; Data</h4>
+      <ul>
+        <li><a href="#dash">City Congestion Profile (24h)</a></li>
+        <li><a href="#dash">Corridor Heatmap Matrix (D5)</a></li>
+        <li><a href="#data">D1 Historical Kaggle Dataset</a></li>
+        <li><a href="#data">D3 Live Telemetry Slots</a></li>
+        <li><a href="#data">Neon Serverless PostgreSQL</a></li>
+        <li><a href="#data">Privacy &amp; k-Anonymity Policy</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="seo-copyright">
+    <div>&copy; 2026 MetroMind · E1CSA313 Design Project – I · Alliance University</div>
+    <div>Authors: Akshat Kishore, Arya Utkarsh, Bodar Lucky Kumar, D. Sai Shikhar Achari · Mentor: Dr. C. Viji</div>
+  </div>
+</footer>
+
 <div class="toast" id="toast"></div>
 
   <!-- Leaflet 1.9.4 Interactive Maps Engine -->

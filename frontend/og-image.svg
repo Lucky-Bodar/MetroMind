@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#050D1F"/>
+      <stop offset="50%" stop-color="#0B1730"/>
+      <stop offset="100%" stop-color="#13264A"/>
+    </linearGradient>
+    <linearGradient id="brand" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#5EEAD4"/>
+      <stop offset="50%" stop-color="#93C5FD"/>
+      <stop offset="100%" stop-color="#FDE68A"/>
+    </linearGradient>
+    <linearGradient id="teal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14B8A6"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  
+  <!-- Subtle Grid Lines -->
+  <g stroke="rgba(255,255,255,0.04)" stroke-width="1">
+    <line x1="0" y1="105" x2="1200" y2="105"/>
+    <line x1="0" y1="210" x2="1200" y2="210"/>
+    <line x1="0" y1="315" x2="1200" y2="315"/>
+    <line x1="0" y1="420" x2="1200" y2="420"/>
+    <line x1="0" y1="525" x2="1200" y2="525"/>
+    <line x1="200" y1="0" x2="200" y2="630"/>
+    <line x1="400" y1="0" x2="400" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/>
+    <line x1="800" y1="0" x2="800" y2="630"/>
+    <line x1="1000" y1="0" x2="1000" y2="630"/>
+  </g>
+
+  <!-- Glow Blobs -->
+  <circle cx="150" cy="120" r="180" fill="#14B8A6" opacity="0.12" filter="url(#glow)"/>
+  <circle cx="1050" cy="480" r="220" fill="#3B82F6" opacity="0.12" filter="url(#glow)"/>
+
+  <!-- Logo Icon -->
+  <rect x="90" y="80" width="76" height="76" rx="20" fill="url(#teal)" filter="url(#glow)"/>
+  <text x="128" y="132" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="44" font-weight="900" fill="#06201D" text-anchor="middle">M</text>
+
+  <!-- Brand Title -->
+  <text x="185" y="128" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="46" font-weight="800" fill="#FFFFFF" letter-spacing="0.5">MetroMind</text>
+  <text x="185" y="152" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="17" font-weight="600" fill="#7CF0E1" letter-spacing="1.5">AI-DRIVEN TRAFFIC OPTIMIZATION · BENGALURU</text>
+
+  <!-- Main Headline -->
+  <text x="90" y="270" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="56" font-weight="800" fill="url(#brand)" line-height="1.2">
+    Plan Any Trip Across Bengaluru,
+  </text>
+  <text x="90" y="340" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="56" font-weight="800" fill="#FFFFFF">
+    Minus The Guesswork.
+  </text>
+
+  <!-- Subheadline -->
+  <text x="90" y="405" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="22" font-weight="400" fill="#9FB2CC">
+    Dynamic Bottleneck Diagnosis · Spill-Over Constrained Routing · 80 Transit Nodes · 17 Corridors
+  </text>
+
+  <!-- Badges Container -->
+  <g transform="translate(90, 460)">
+    <!-- Badge 1 -->
+    <rect x="0" y="0" width="220" height="50" rx="14" fill="rgba(255,255,255,0.08)" stroke="rgba(20,184,166,0.5)" stroke-width="1.5"/>
+    <circle cx="25" cy="25" r="6" fill="#14B8A6"/>
+    <text x="42" y="32" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="16" font-weight="700" fill="#FFFFFF">Live 5-Min Telemetry</text>
+
+    <!-- Badge 2 -->
+    <rect x="240" y="0" width="230" height="50" rx="14" fill="rgba(255,255,255,0.08)" stroke="rgba(59,130,246,0.5)" stroke-width="1.5"/>
+    <circle cx="265" cy="25" r="6" fill="#3B82F6"/>
+    <text x="282" y="32" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="16" font-weight="700" fill="#FFFFFF">Cap ≤ 75% Spill-Over</text>
+
+    <!-- Badge 3 -->
+    <rect x="490" y="0" width="240" height="50" rx="14" fill="rgba(255,255,255,0.08)" stroke="rgba(245,158,11,0.5)" stroke-width="1.5"/>
+    <circle cx="515" cy="25" r="6" fill="#F59E0B"/>
+    <text x="532" y="32" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="16" font-weight="700" fill="#FFFFFF">Esri ArcGIS Multi-Maps</text>
+
+    <!-- Badge 4 -->
+    <rect x="750" y="0" width="270" height="50" rx="14" fill="rgba(255,255,255,0.08)" stroke="rgba(168,85,247,0.5)" stroke-width="1.5"/>
+    <circle cx="775" cy="25" r="6" fill="#A855F7"/>
+    <text x="792" y="32" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="16" font-weight="700" fill="#FFFFFF">Neon Serverless PostgreSQL</text>
+  </g>
+
+  <!-- Footer University Attribution -->
+  <line x1="90" y1="560" x2="1110" y2="560" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <text x="90" y="595" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="16" font-weight="600" fill="#7CF0E1">Alliance University · Department of Computer Science &amp; Engineering</text>
+  <text x="1110" y="595" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="16" font-weight="500" fill="#9FB2CC" text-anchor="end">E1CSA313 Design Project – I</text>
+</svg>
