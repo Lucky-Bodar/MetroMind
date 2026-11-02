@@ -182,7 +182,7 @@ const RD=(()=>{const cv=$("road"),cx=cv.getContext("2d"),hero=$("top"),CC=["#ff5
   const rg=cx.createLinearGradient(0,rt,0,rt+150);rg.addColorStop(0,"#17233a");rg.addColorStop(1,"#0a111f");cx.fillStyle=rg;cx.fillRect(0,rt,W,150);cx.fillStyle="#2b3c5c";cx.fillRect(0,rt+150,W,40);
   cx.strokeStyle="rgba(255,255,255,.55)";cx.lineWidth=3;cx.setLineDash([34,26]);cx.lineDashOffset=(cam*1)%60;[rt+50,rt+100].forEach(y=>{cx.beginPath();cx.moveTo(0,y);cx.lineTo(W,y);cx.stroke()});cx.setLineDash([]);
   const span=W+300;cars.forEach(c=>{const x=(((c.k*span/5+dist[c.l])%span)+span)%span-150,sc=[.88,1,1.14][c.l];car(c,x,rt+LY[c.l]*150,sc)})}
- function frame(now){const dt=Math.min(.05,(now-last)/1000||0);last=now;VEL*=.94;if(scrollY<Hh+60&&!document.hidden){const sp=1+Math.min(Math.abs(VEL),3000)/320;off+=dt*60*sp;LS.forEach((v,i)=>dist[i]+=v*sp*dt);draw(now/1000)}requestAnimationFrame(frame)}
+ function frame(now){const dt=Math.min(.05,(now-last)/1000||0);last=now;VEL*=.94;const pOn=$("plan")&&$("plan").classList.contains("on");if(pOn&&scrollY<Hh+80&&!document.hidden){const sp=1+Math.min(Math.abs(VEL),3000)/320;off+=dt*60*sp;LS.forEach((v,i)=>dist[i]+=v*sp*dt);draw(now/1000)}requestAnimationFrame(frame)}
  return{start(){size();addEventListener("resize",size);requestAnimationFrame(frame)}}})();
 /* ---------- v3: wiring ---------- */
 function v3init(){tick();sync();setInterval(tick,1000);setInterval(sync,5000);RD.start();
@@ -254,6 +254,23 @@ function render(anim){const R=RES,cur=R.cur,mode=R.mode,bn=R.bn;$("out").style.d
  $("cmp").querySelectorAll("[data-tm]").forEach(tr=>{if(tr.dataset.tm)tr.onclick=()=>{$("tm").value=fmt(+tr.dataset.tm);run(false)}});
  const ne=R.es.length;$("trace").innerHTML=`<div class="tc rv"><b>D1 Historical data</b><br>Baseline index for ${ne} road sections at ${fmt(R.st)} (hour and weekday pattern).</div><div class="tc rv ${R.live?"":"fb"}"><b>D3 Live feed</b><br>${R.live?"Current 5-minute slot blended in (65% live, 35% baseline). Other departure times use D1 only.":"Not available. Fallback: D1 patterns corrected by D2 trip times (×1.03)."}</div><div class="tc rv"><b>D4 Road network &amp; weather</b><br>City graph of ${N.length} places, route length ${cur.dist.toFixed(1)} km, weather: ${$("wx").selectedOptions[0].text.toLowerCase()}.</div><div class="tc rv"><b>D2 Commuter trips</b><br>${R.incTxt?"Incident report applied on "+R.incTxt+". ":""}Delay reports explain the bottleneck; your trip joins D2 when saved.</div><div class="tc rv"><b>D5 Corridor summary</b><br>Updated when trips are saved (see Corridor Dashboard).</div>`;
  $("saved").textContent="";reveal($("out"));drawMap(R);zoomTo(fitBox(R.es.concat(R.alt?R.alt.es:[])),1100);
+ if(window.Motion&&Motion.animate){try{Motion.animate(".kpi",{opacity:[0,1],scale:[0.96,1],y:[12,0]},{duration:0.4,delay:Motion.stagger(0.04),easing:[0.22,1,0.36,1]});Motion.animate("#bn,#sg",{opacity:[0,1],y:[10,0]},{duration:0.35,delay:Motion.stagger(0.08)});}catch(e){}}
+ if($("copy-summary"))$("copy-summary").onclick=()=>{
+   const txt=`🚗 MetroMind Route Intelligence · Bengaluru\nOrigin: ${SEL.src.n.split(" (")[0]} → Destination: ${SEL.dst.n.split(" (")[0]}\n`+
+     `• Estimated Time: ${Math.round(cur.tot)} min (${MODE[mode]})\n`+
+     `• Distance: ${cur.dist.toFixed(1)} km · Avg Speed: ${sp.toFixed(0)} km/h\n`+
+     `• Congestion: ${avg}% (${lab(avg)})\n`+
+     `• Identified Bottleneck: ${bn.from.split(" (")[0]} → ${bn.to.split(" (")[0]} (+${(bn.mins-bn.fm).toFixed(1)} min delay)\n`+
+     `• Spill-over Guard: Verified (<75% downstream capacity)\n`+
+     `https://metromind.vercel.app/`;
+   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(()=>toast("✔ Route summary copied to clipboard!")).catch(()=>toast("Summary copied"));}else toast("Copied");
+ };
+ if($("share-link"))$("share-link").onclick=()=>{
+   const u=new URL(window.location.origin+window.location.pathname);
+   u.searchParams.set("src",SEL.src.n.split(" (")[0]);
+   u.searchParams.set("dst",SEL.dst.n.split(" (")[0]);
+   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(u.toString()).then(()=>toast("✔ Shareable route link copied to clipboard!")).catch(()=>toast("Link copied"));}else toast("Link copied");
+ };
  msumFill(R);ropts();pbSet(5)}
 function chart(){const R=RES,pts=[];for(let h=5;h<=22;h+=.25)pts.push([h,evalP(R.es,h,R.mode,C,false).tot]);const mx=Math.max(...pts.map(p=>p[1]))*1.1,mn=Math.min(...pts.map(p=>p[1]))*.88,W=640,Hh=220,P=38,X=h=>P+(h-5)/17*(W-P-12),Y=v=>Hh-28-(v-mn)/(mx-mn)*(Hh-50);
  let o=`<svg id="csv" viewBox="0 0 ${W} ${Hh}" width="100%"><defs><linearGradient id="ar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14b8a6" stop-opacity=".35"/><stop offset="1" stop-color="#14b8a6" stop-opacity="0"/></linearGradient></defs>`;
@@ -280,11 +297,11 @@ const cnt2=(el,to)=>cnt(el,to);
 function pillTo(b){const p=$("pill");p.style.left=b.offsetLeft+"px";p.style.width=b.offsetWidth+"px"}
 function setup(){ac("src");ac("dst");const bs=[...document.querySelectorAll("#nav button")];pillTo(bs[0]);
  bs.forEach(b=>b.onclick=()=>{bs.forEach(x=>x.classList.toggle("on",x===b));pillTo(b);document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",t.id===b.dataset.t));const t=$(b.dataset.t);if(b.dataset.t==="dash")dash();if(b.dataset.t==="data"){const S=[[N.length,"Places in the road graph"],[CORR.length,"Mapped corridors"],[4,"Input datasets (D1–D4)"],[8,"Preprocessing steps"]];$("st").innerHTML=S.map(s=>`<div class="kpi rv"><b><em style="font-style:normal">0</em></b><span>${s[1]}</span></div>`).join("");$("st").querySelectorAll("em").forEach((e,i)=>cnt(e,S[i][0]))}reveal(t);setTimeout(()=>MAP&&MAP.invalidateSize(),60);b.dataset.s&&b.dataset.s!=="top"?$(b.dataset.s).scrollIntoView({behavior:"smooth"}):window.scrollTo({top:0,behavior:"smooth"})});
- const EX=[["Whitefield","Electronic City"],["Yelahanka","Jayanagar"],["Kengeri","Indiranagar"],["Kempegowda Airport (BLR)","MG Road"],["Hebbal","Silk Board"]];
- $("ex").innerHTML='<span style="color:#9fb2cc;font-size:12.5px;align-self:center">Try:</span>'+EX.map((e,i)=>`<span class="chip" data-i="${i}">${e[0].split(" (")[0]} → ${e[1].split(" (")[0]}</span>`).join("");
- $("ex").onclick=e=>{const c=e.target.closest(".chip");if(!c)return;const x=EX[+c.dataset.i];SEL.src=N.find(n=>n.n===x[0]);SEL.dst=N.find(n=>n.n===x[1]);$("src").value=x[0];$("dst").value=x[1];$("src").classList.add("ok");$("dst").classList.add("ok");$("tm").value="08:30";run(true)};
- $("go").onclick=()=>run(true);["mode","day","wx","live","inc"].forEach(i=>$(i).onchange=()=>{if(SEL.src&&SEL.dst&&RES)run(false)});$("tm").onchange=()=>{if(SEL.src&&SEL.dst&&RES)run(false)};
- $("swap").onclick=()=>{const a=SEL.src,b=SEL.dst;SEL.src=b;SEL.dst=a;$("src").value=b?b.n:"";$("dst").value=a?a.n:"";$("src").classList.toggle("ok",!!b);$("dst").classList.toggle("ok",!!a);drawMap(RES&&0);if(a&&b&&RES)run(false);else drawMap(null)};
+ const EX=[["Hebbal","Silk Board"],["Indiranagar","ITPL (Whitefield)"],["Koramangala","Electronic City"],["Kempegowda Airport (BLR)","MG Road"],["Nagawara (Manyata Tech Park)","Silk Board"],["Whitefield","Electronic City"]];
+ $("ex").innerHTML='<span style="color:#9fb2cc;font-size:12.5px;align-self:center;font-weight:600">Quick Routes:</span>'+EX.map((e,i)=>`<span class="chip" data-i="${i}">⚡ ${e[0].split(" (")[0]} → ${e[1].split(" (")[0]}</span>`).join("");
+ $("ex").onclick=e=>{const c=e.target.closest(".chip");if(!c)return;if(window.Motion&&Motion.animate){try{Motion.animate(c,{scale:[1,0.92,1.06,1]},{duration:0.3,easing:[0.34,1.56,0.64,1]})}catch(err){}}const x=EX[+c.dataset.i];SEL.src=N.find(n=>n.n===x[0]);SEL.dst=N.find(n=>n.n===x[1]);$("src").value=x[0];$("dst").value=x[1];$("src").classList.add("ok");$("dst").classList.add("ok");$("tm").value="08:30";run(true)};
+ $("go").onclick=()=>{if(window.Motion&&Motion.animate){try{Motion.animate("#go",{scale:[1,0.95,1.02,1]},{duration:0.25})}catch(err){}}run(true)};["mode","day","wx","live","inc"].forEach(i=>$(i).onchange=()=>{if(SEL.src&&SEL.dst&&RES)run(false)});$("tm").onchange=()=>{if(SEL.src&&SEL.dst&&RES)run(false)};
+ $("swap").onclick=()=>{if(window.Motion&&Motion.animate){try{Motion.animate("#swap",{rotate:[0,180]},{duration:0.35,easing:[0.34,1.56,0.64,1]})}catch(err){}}const a=SEL.src,b=SEL.dst;SEL.src=b;SEL.dst=a;$("src").value=b?b.n:"";$("dst").value=a?a.n:"";$("src").classList.toggle("ok",!!b);$("dst").classList.toggle("ok",!!a);drawMap(RES&&0);if(a&&b&&RES)run(false);else drawMap(null)};
   $("fit").onclick=()=>RES?zoomTo(fitBox(RES.es.concat(RES.alt?RES.alt.es:[]))):toast("Analyse a trip first");$("city").onclick=()=>zoomTo([0,0,MW,MH]);
  $("cons").onchange=()=>$("save").disabled=!$("cons").checked;
  $("save").onclick=async()=>{if(!LAST||!$("cons").checked)return;
@@ -296,6 +313,26 @@ function setup(){ac("src");ac("dst");const bs=[...document.querySelectorAll("#na
   TRIPS.push({id:tId,u:uId,r:payload.source+" → "+payload.destination,st:LAST.st,m:LAST.mode,tt:LAST.cur.tot,corr:cs});
   $("saved").textContent="✔ Saved to database. See the Corridor Dashboard tab.";$("cons").checked=false;$("save").disabled=true;toast("Trip saved anonymously ("+tId+")")};
  document.addEventListener("click",e=>{const b=e.target.closest(".btn,.swap");if(!b)return;const r=b.getBoundingClientRect(),s=Math.max(r.width,r.height),sp=document.createElement("span");sp.className="rip";sp.style.cssText=`width:${s}px;height:${s}px;left:${e.clientX-r.left-s/2}px;top:${e.clientY-r.top-s/2}px`;b.appendChild(sp);setTimeout(()=>sp.remove(),600)});
+ document.addEventListener("keydown",e=>{
+  const tag=document.activeElement?document.activeElement.tagName.toLowerCase():"";
+  if(tag==="input"||tag==="select"||tag==="textarea"){
+    if(e.key==="Escape"){document.activeElement.blur();document.querySelectorAll(".list").forEach(l=>l.classList.remove("on"))}
+    return;
+  }
+  if(e.key==="/"){e.preventDefault();$("src").focus();$("src").select()}
+  else if(e.key==="s"||e.key==="S"){e.preventDefault();$("swap").click()}
+  else if(e.key==="1"){const b=document.querySelector("#nav button[data-t='plan']");if(b)b.click()}
+  else if(e.key==="2"){const b=document.querySelector("#nav button[data-t='dash']");if(b)b.click()}
+  else if(e.key==="3"){const b=document.querySelector("#nav button[data-t='data']");if(b)b.click()}
+ });
+ try{
+  const up=new URLSearchParams(window.location.search),qs=up.get("src"),qd=up.get("dst");
+  if(qs&&qd){
+    const sn=N.find(n=>n.n.toLowerCase().includes(qs.toLowerCase())),dn=N.find(n=>n.n.toLowerCase().includes(qd.toLowerCase()));
+    if(sn&&dn){SEL.src=sn;SEL.dst=dn;$("src").value=sn.n;$("dst").value=dn.n;$("src").classList.add("ok");$("dst").classList.add("ok");setTimeout(()=>run(true),350)}
+  }
+ }catch(err){}
+ if(window.Motion&&Motion.animate){try{Motion.animate(".brand,.live div,.form",{opacity:[0,1],y:[14,0]},{duration:0.55,delay:Motion.stagger(0.06),easing:[0.22,1,0.36,1]})}catch(err){}}
  drawMap(null);reveal($("plan"));addEventListener("resize",()=>pillTo(document.querySelector("#nav .on")))}
 
 /* ---------- v4: city profile chart (bars coloured by delay intensity) ---------- */
@@ -316,6 +353,7 @@ document.addEventListener("click",e=>{const b=e.target.closest("#cpt button");if
 function ropts(){const R=RES,b=$("ropts"),rs=R.routes,av=x=>Math.round(x.r.rows.reduce((a,q)=>a+q.cg*q.len,0)/x.r.dist),mn=f=>rs.reduce((m,y,j)=>f(y)<f(rs[m])?j:m,0),ft=mn(x=>x.r.tot),sh=mn(x=>x.r.dist),lc=mn(x=>av(x));
  b.innerHTML='<h3>'+(rs.length>1?"Two ways to get there. Pick one.":"Only one road link found")+'</h3><div class="rg">'+rs.map((x,i)=>{const r=x.r,vc={};x.es.forEach(e=>{if(e.art)vc[e.corr]=(vc[e.corr]||0)+e.len});const via=Object.entries(vc).sort((a,c)=>c[1]-a[1]).slice(0,2).map(v=>v[0]).join(" + ")||"local roads",a=av(x),tg=[i===ft&&"Fastest",i===sh&&rs.length>1&&"Shortest",i===lc&&rs.length>1&&"Least congested"].filter(Boolean).map(t=>`<em class="tg">${t}</em>`).join("");
   return `<button class="rc ${i===R.sel?"on":""}" data-r="${i}" style="--rc:${i?"#8b6cf0":"#0e8f82"};--i:${i}"><span class="rn">Route ${i+1}${i===R.sel?" · shown on map":""}</span><span>${tg}</span><b>${Math.round(r.tot)} min</b><small>${r.dist.toFixed(1)} km · arrive ${fmt(r.st+r.tot/60)}</small><small>via ${via}</small><div class="bar"><i style="width:${a}%;background:${col(a)}"></i></div><small>${a}% ${lab(a)} · ${r.ok?"nearby roads OK":"may overload nearby roads"}</small></button>`}).join("")+"</div>";b.classList.add("on");
+ if(window.Motion&&Motion.animate){try{Motion.animate(".rc",{opacity:[0,1],y:[12,0]},{duration:0.38,delay:Motion.stagger(0.06),easing:[0.22,1,0.36,1]})}catch(err){}}
  b.onclick=e=>{const c=e.target.closest("[data-r]");if(c)selRoute(+c.dataset.r)}}
 function selRoute(i){const R=RES;if(i===R.sel||!R.routes[i])return;const o=R.routes[1-i];R.sel=i;R.es=R.routes[i].es;R.cur=R.routes[i].r;R.alt=o?{es:o.es,r:o.r}:null;R.bn=R.cur.rows.reduce((a,b)=>b.mins-b.fm>a.mins-a.fm?b:a);render(false);toast("Showing Route "+(i+1))}
 function rank(){const h=+$("hr").value,cc={we:false,wx:"clear",inc:""},rows=[];$("hrt").textContent=fmt(h);CORR.forEach(([nm])=>{const es=[];AD.forEach(m=>m.forEach(e=>{if(e.corr===nm&&e.a<e.to)es.push(e)}));if(es.length)rows.push([nm,Math.round(es.reduce((a,e)=>a+cong(ttiE(e,h+.5,cc,false)),0)/es.length)])});rows.sort((a,b)=>b[1]-a[1]);

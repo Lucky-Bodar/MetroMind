@@ -57,7 +57,8 @@
   <link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/leaflet.css">
+  <link rel="stylesheet" href="css/leaflet.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/leaflet.css"></noscript>
   <link rel="stylesheet" href="css/style.css">
 
   <!-- JSON-LD Structured Data Schema (Search Engine Gold) -->
@@ -191,63 +192,110 @@
   </script>
 </head>
 <body>
+<a href="#plan" class="skip-link">Skip to trip planner</a>
 <div id="prog"><i id="pgi"></i><b id="pgc">🚗</b></div>
-<header role="banner"><div class="brand"><div class="logo">M</div><div><b>MetroMind</b><small>AI-driven traffic optimisation · Bengaluru</small></div></div>
-<nav id="nav" role="navigation" aria-label="Main Navigation"><span id="pill"></span><button data-t="plan" data-s="top" class="on">Trip Planner</button><button data-t="dash">Corridor Dashboard</button><button data-t="data">Datasets &amp; Pipeline</button></nav>
-<div class="lv" id="lv" title="Clock is real IST time. Sensor readings are a simulated D3 feed in this prototype."><span class="ld"></span><div><b id="clk">--:--:--</b><small id="dt"></small></div><span class="sep"></span><div class="l2"><b>LIVE · D3 feed</b><small id="sync">connecting…</small></div></div>
-<div class="pbar" id="pbar"><span class="pl">Pipeline</span>
-<button class="pb" data-k="0"><i>1</i>Collect</button><span class="ar">›</span><button class="pb" data-k="1"><i>2</i>Preprocess</button><span class="ar">›</span><button class="pb" data-k="2"><i>3</i>Estimate</button><span class="ar">›</span><button class="pb" data-k="3"><i>4</i>Diagnose</button><span class="ar">›</span><button class="pb" data-k="4"><i>5</i>Guide</button>
-<div class="dcs"><span class="dc" title="D1 · Historical Bengaluru traffic (Kaggle): baseline for every estimate">D1</span><span class="dc" title="D2 · Commuter trips and incident reports (volunteers)">D2</span><span class="dc l3" id="d3c" title="D3 · Live corridor feed (cameras, sensors): blended into the estimate">D3 live</span><span class="dc" title="D4 · Road network and weather">D4</span><span class="dc" title="D5 · Anonymous corridor summary (derived)">D5</span></div></div></header>
+<header role="banner">
+  <div class="brand" role="img" aria-label="MetroMind Traffic Intelligence">
+    <div class="logo">M</div>
+    <div><b>MetroMind</b><small>AI-driven traffic optimisation · Bengaluru</small></div>
+  </div>
+  <nav id="nav" role="tablist" aria-label="Main Application Views">
+    <span id="pill"></span>
+    <button data-t="plan" data-s="top" class="on" role="tab" aria-selected="true" aria-controls="plan">Trip Planner</button>
+    <button data-t="dash" role="tab" aria-selected="false" aria-controls="dash">Corridor Dashboard</button>
+    <button data-t="data" role="tab" aria-selected="false" aria-controls="data">Datasets &amp; Pipeline</button>
+  </nav>
+  <div class="lv" id="lv" title="Clock is real IST time. Sensor readings are a simulated D3 feed in this prototype." aria-live="polite">
+    <span class="ld"></span>
+    <div><b id="clk">--:--:--</b><small id="dt"></small></div>
+    <span class="sep"></span>
+    <div class="l2"><b>LIVE · D3 feed</b><small id="sync">connecting…</small></div>
+  </div>
+  <div class="pbar" id="pbar" role="navigation" aria-label="Pipeline Stages"><span class="pl">Pipeline</span>
+    <button class="pb" data-k="0"><i>1</i>Collect</button><span class="ar">›</span>
+    <button class="pb" data-k="1"><i>2</i>Preprocess</button><span class="ar">›</span>
+    <button class="pb" data-k="2"><i>3</i>Estimate</button><span class="ar">›</span>
+    <button class="pb" data-k="3"><i>4</i>Diagnose</button><span class="ar">›</span>
+    <button class="pb" data-k="4"><i>5</i>Guide</button>
+    <div class="dcs">
+      <span class="dc" title="D1 · Historical Bengaluru traffic (Kaggle): baseline for every estimate">D1</span>
+      <span class="dc" title="D2 · Commuter trips and incident reports (volunteers)">D2</span>
+      <span class="dc l3" id="d3c" title="D3 · Live corridor feed (cameras, sensors): blended into the estimate">D3 live</span>
+      <span class="dc" title="D4 · Road network and weather">D4</span>
+      <span class="dc" title="D5 · Anonymous corridor summary (derived)">D5</span>
+    </div>
+  </div>
+</header>
 
 <section class="tab on" id="plan">
-<div class="hero" id="top"><canvas id="road"></canvas>
+<div class="hero" id="top"><canvas id="road" aria-hidden="true"></canvas>
 <div class="wrap hg"><div class="hl" id="hl">
-  <span class="eyebrow rv"><i class="dot"></i> LIVE DEMO · CITY-WIDE ROUTING</span>
+  <span class="eyebrow rv"><i class="dot"></i> LIVE URBAN TELEMETRY · 80 HUBS / 17 CORRIDORS</span>
   <h1 class="rv">Plan any trip across <span>Bengaluru</span>, minus the guesswork.</h1>
-  <p class="sub rv">Enter any source and destination. MetroMind estimates congestion for every road section, finds the bottleneck and suggests the better route, time or mode. Scroll down: the map is on the next page</p>
-  <div class="live rv"><div><b id="ci">–</b><span>City congestion now (model)</span></div><div><b id="slot">–</b><span>Current 5-min slot</span></div><div><b id="rd">–</b><span>Readings captured today</span></div></div>
+  <p class="sub rv">Enter any origin and destination. MetroMind estimates congestion for every road section, finds the physical bottleneck and recommends the optimal route, departure time, or travel mode.</p>
+  <div class="live rv"><div><b id="ci">–</b><span>City congestion index</span></div><div><b id="slot">–</b><span>Current 5-min slot</span></div><div><b id="rd">–</b><span>Readings ingested today</span></div></div>
+  <div class="kbd-guide rv" aria-label="Keyboard navigation shortcuts">
+    <span class="kbd-pill"><kbd>/</kbd> Route Search</span>
+    <span class="kbd-pill"><kbd>S</kbd> Swap</span>
+    <span class="kbd-pill"><kbd>1-3</kbd> Tabs</span>
+    <span class="kbd-pill"><kbd>↵</kbd> Analyse</span>
+  </div>
  </div>
  <div><div class="form rv">
-   <div class="fld"><label for="src">From</label><input id="src" autocomplete="off" placeholder="e.g. Whitefield, Yelahanka, Kengeri…"><div class="list" id="srcL"></div></div>
-   <div class="swapw"><button class="swap" id="swap" title="Swap">⇅</button></div>
-   <div class="fld"><label for="dst">To</label><input id="dst" autocomplete="off" placeholder="e.g. Electronic City, Indiranagar, Airport…"><div class="list" id="dstL"></div></div>
-   <div class="g2"><div class="sel"><label for="tm">Departure time <a id="now" class="nowb">⏱ use live time</a></label><input type="time" id="tm" value="08:30"></div>
-    <div class="sel"><label for="mode">Mode of travel</label><select id="mode"><option value="car">Car</option><option value="bike">Two-wheeler</option><option value="bus">Bus</option></select></div>
-    <div class="sel"><label for="day">Day type</label><select id="day"><option value="wd">Weekday</option><option value="we">Weekend</option></select></div>
-    <div class="sel"><label for="wx">Weather (D4)</label><select id="wx"><option value="clear">Clear</option><option value="rain">Rain</option><option value="heavy">Heavy rain</option></select></div></div>
-   <label class="chk"><input type="checkbox" id="live" checked> Live sensor feed available (D3)</label>
-   <label class="chk"><input type="checkbox" id="inc"> Simulate an incident on my route (D2 report)</label>
-   <button class="btn big" id="go">Analyse trip →</button>
-   <div id="msg"></div><div class="chips" id="ex"></div>
+   <div class="fld"><label for="src">Origin / Departure Hub</label><input id="src" autocomplete="off" placeholder="e.g. Whitefield, Indiranagar, Hebbal…"><div class="list" id="srcL" role="listbox"></div></div>
+   <div class="swapw"><button class="swap" id="swap" title="Swap origin and destination" aria-label="Swap origin and destination hubs">⇅</button></div>
+   <div class="fld"><label for="dst">Destination / Arrival Hub</label><input id="dst" autocomplete="off" placeholder="e.g. Electronic City, Airport, Silk Board…"><div class="list" id="dstL" role="listbox"></div></div>
+   <div class="g2">
+    <div class="sel"><label for="tm">Departure time <a id="now" class="nowb" role="button" tabindex="0">⏱ use live time</a></label><input type="time" id="tm" value="08:30"></div>
+    <div class="sel"><label for="mode">Mode of travel</label><select id="mode" aria-label="Mode of travel"><option value="car">Car (Personal vehicle)</option><option value="bike">Two-wheeler (Motorcycle/Scooter)</option><option value="bus">BMTC Public Transit Bus</option></select></div>
+    <div class="sel"><label for="day">Day type</label><select id="day" aria-label="Day type schedule"><option value="wd">Weekday (Standard arterial commute)</option><option value="we">Weekend / Holiday profile</option></select></div>
+    <div class="sel"><label for="wx">Weather (D4)</label><select id="wx" aria-label="Weather conditions"><option value="clear">Clear weather (Normal grip)</option><option value="rain">Monsoon rain (-18% friction)</option><option value="heavy">Heavy downpour / Flooding</option></select></div>
+   </div>
+   <label class="chk"><input type="checkbox" id="live" checked> Ingest live 5-minute sensor feed (D3)</label>
+   <label class="chk"><input type="checkbox" id="inc"> Simulate real-time incident on route (D2 delay report)</label>
+   <button class="btn big" id="go" aria-label="Analyse trip congestion and calculate optimal route">Analyse trip →</button>
+   <div id="msg" role="status" aria-live="polite"></div>
+   <div class="chips" id="ex" aria-label="Quick preset commute corridors"></div>
   </div></div></div>
-<div class="cue" id="cue">Scroll for the live map<br>↓</div></div>
+<div class="cue" id="cue" role="button" tabindex="0">Scroll for the live map<br>↓</div></div>
 
 <section class="msec" id="mapsec"><div class="wrap">
- <div class="sr"><span class="eyebrow"><i class="dot"></i> STEP 2 · LIVE MAP</span><h2>Your route on the Bengaluru map</h2><p>Switch between Normal, Night and Satellite views. Click any dot to set it as source or destination. After “Analyse trip”, the route draws itself, coloured by congestion, with the bottleneck pulsing in red.</p></div>
+ <div class="sr"><span class="eyebrow"><i class="dot"></i> STEP 2 · SPATIAL MAP</span><h2>Your route on the Bengaluru map</h2><p>Switch between Normal, Night and Satellite views. Click any transit node to set it as origin or destination. After “Analyse trip”, the optimal path renders along road vectors, coloured by real-time congestion, with the active bottleneck pulsing in red.</p></div>
  <div class="mapc sr" id="mapc" data-b="normal">
-  <div class="mleg"><b>Congestion</b><span><i style="background:var(--g)"></i>Free<em>&lt;30%</em></span><span><i style="background:var(--y)"></i>Moderate<em>30–54%</em></span><span><i style="background:var(--o)"></i>Heavy<em>55–74%</em></span><span><i style="background:var(--r)"></i>Severe<em>75%+</em></span></div>
-  <div class="bsw" id="bsw"><span id="bpill"></span><button data-b="normal" class="on">🗺️ Normal</button><button data-b="night">🌙 Night</button><button data-b="sat">🛰️ Satellite</button></div>
-  <div class="mtools"><button id="fit">Fit route</button><button id="city">Full city</button></div>
-  <div id="mapw"></div><div class="msum" id="msum"></div>
-  <div class="mhint" id="mh">Tip: click any dot on the map to set it as source or destination</div>
+  <div class="mleg" aria-label="Map congestion legend"><b>Congestion</b><span><i style="background:var(--g)"></i>Free<em>&lt;30%</em></span><span><i style="background:var(--y)"></i>Moderate<em>30–54%</em></span><span><i style="background:var(--o)"></i>Heavy<em>55–74%</em></span><span><i style="background:var(--r)"></i>Severe<em>75%+</em></span></div>
+  <div class="bsw" id="bsw" role="toolbar" aria-label="Map Basemap Switcher"><span id="bpill"></span><button data-b="normal" class="on">🗺️ Normal</button><button data-b="night">🌙 Night</button><button data-b="sat">🛰️ Satellite</button></div>
+  <div class="mtools" role="toolbar" aria-label="Map Navigation Tools"><button id="fit">Fit route</button><button id="city">Full city</button></div>
+  <div id="mapw" aria-label="Interactive Leaflet Map"></div><div class="msum" id="msum"></div>
+  <div class="mhint" id="mh">Tip: click any node on the map to set it as origin or destination</div>
   </div><div class="ropts" id="ropts"></div></div></section>
 <main role="main">
- <div class="card" id="pipe"><div class="spin"></div><b>Running the MetroMind pipeline…</b><div class="pst" id="pst"></div></div>
+ <div class="card" id="pipe" role="status" aria-live="polite"><div class="spin"></div><b>Running the MetroMind multi-dataset pipeline…</b><div class="pst" id="pst"></div></div>
  <div id="out" style="display:none">
-  <div class="via rv" id="via"></div>
+  <div class="via-wrap">
+    <div class="via rv" id="via"></div>
+    <div class="action-bar" id="action-bar">
+      <button class="btn sec-tool" id="copy-summary" aria-label="Copy route summary to clipboard">📋 Copy Route Summary</button>
+      <button class="btn sec-tool" id="share-link" aria-label="Copy direct shareable route link">🔗 Share Route</button>
+    </div>
+  </div>
   <div class="kpis" id="kpis"></div>
   <div class="cols"><div class="card rv" id="bn"></div><div class="card sug rv" id="sg"></div></div>
   <div class="card rv"><h2><span class="ic">🛣️</span>Section-wise estimate for your route</h2><div class="sc" id="secs"></div></div>
-  <div class="cols"><div class="card rv"><h2><span class="ic">📈</span>Travel time vs departure time</h2><div id="chart"></div><input type="range" id="sl" min="5" max="22" step=".25"><div class="muted" id="slt"></div></div>
+  <div class="cols"><div class="card rv"><h2><span class="ic">📈</span>Travel time vs departure time</h2><div id="chart"></div><input type="range" id="sl" min="5" max="22" step=".25" aria-label="Adjust departure time for travel time comparison"><div class="muted" id="slt"></div></div>
    <div class="card rv"><h2><span class="ic">⚖️</span>What-if comparison <small class="muted">(click a time to apply)</small></h2><div class="sc" id="cmp"></div></div></div>
   <div class="card rv"><h2><span class="ic">🗂️</span>Which dataset produced this result?</h2><div class="trace" id="trace"></div></div>
-  <div class="card rv"><div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><label class="chk" style="color:var(--ink);margin:0"><input type="checkbox" id="cons"> I consent to adding this trip to the anonymous corridor summary (random ID, section-level only)</label><button class="btn" id="save" disabled>Save trip (D2)</button><span class="muted" id="saved"></span></div></div>
+  <div class="card rv"><div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><label class="chk" style="color:var(--ink);margin:0"><input type="checkbox" id="cons"> I consent to adding this trip to the anonymous corridor summary (random ID, section-level only)</label><button class="btn" id="save" disabled aria-label="Save anonymous trip to PostgreSQL">Save trip (D2)</button><span class="muted" id="saved"></span></div></div>
  </div>
 </main></section>
 
 <section class="tab" id="dash"><main style="margin-top:24px">
  <div class="phd rv"><h1>Corridor dashboard</h1><p>Which of Bengaluru’s 17 main corridors slow down, and when. Built only from the anonymous corridor summary (D5), so no commuter can be identified.</p></div>
- <div class="card rv"><div class="cph"><h2><span class="ic">🏁</span>Corridor ranking at <b id="hrt">08:00</b></h2><button class="btn sec" id="hnow">Use current hour</button></div><p class="muted" style="margin:0">Drag the slider to compare hours. Corridors are sorted from most to least congested.</p><input type="range" id="hr" min="5" max="22" step="1" value="8"><div id="rank"></div></div>
+ <div class="card rv"><div class="cph"><h2><span class="ic">🏁</span>Corridor ranking at <b id="hrt">08:00</b></h2><button class="btn sec" id="hnow" aria-label="Set ranking to current IST hour">Use current hour</button></div><p class="muted" style="margin:0">Drag the slider to compare hours. Corridors are sorted from most to least congested.</p><input type="range" id="hr" min="5" max="22" step="1" value="8" aria-label="Select hour of day for corridor ranking"><div id="rank"></div></div>
+ <div class="kpis" id="dk"></div>
+ <div class="card rv" id="cp"><div class="cph"><h2><span class="ic">🌆</span>City profile: congestion by hour of day</h2><div class="cpt" id="cpt"><button data-we="0" class="on" aria-label="Show weekday congestion profile">Weekday</button><button data-we="1" aria-label="Show weekend congestion profile">Weekend</button></div></div><p class="muted" style="margin:0 0 8px">Average congestion of the 17 mapped corridors in each hour (clear weather, D1 baseline pattern). Bar height is the congestion index; bar colour shows delay intensity.</p><div id="cpc"></div><div class="cpl"><span><i style="background:#22b573"></i>Free flow (&lt;30%)</span><span><i style="background:#f2c024"></i>Moderate (30–54%)</span><span><i style="background:#f08a2b"></i>Heavy (55–74%)</span><span><i style="background:#e0443a"></i>Severe (75%+)</span><span><i style="background:#fff;border:2px solid var(--ink)"></i>Current hour (IST)</span></div><div class="cpn" id="cpn"></div></div>
+ <div class="card rv"><h2><span class="ic">🔥</span>Anonymous corridor summary (D5): average delay per section by hour</h2><div class="sc" style="max-height:none"><div id="heat"></div></div><p class="muted">Value = average delay in minutes for one road section on that corridor (weekday, clear weather). Cells with fewer than 5 contributing trips are hidden, so no individual commuter can be identified.</p></div>
+ <div class="card rv"><h2><span class="ic">🧾</span>Trips saved in this session</h2><div class="sc" id="trips"><p class="muted">No trips saved yet. Analyse a trip and save it with consent.</p></div></div>
+</main></section>
  <div class="kpis" id="dk"></div>
  <div class="card rv" id="cp"><div class="cph"><h2><span class="ic">🌆</span>City profile: congestion by hour of day</h2><div class="cpt" id="cpt"><button data-we="0" class="on">Weekday</button><button data-we="1">Weekend</button></div></div><p class="muted" style="margin:0 0 8px">Average congestion of the 17 mapped corridors in each hour (clear weather, D1 baseline pattern). Bar height is the congestion index; bar colour shows delay intensity.</p><div id="cpc"></div><div class="cpl"><span><i style="background:#22b573"></i>Free flow (&lt;30%)</span><span><i style="background:#f2c024"></i>Moderate (30–54%)</span><span><i style="background:#f08a2b"></i>Heavy (55–74%)</span><span><i style="background:#e0443a"></i>Severe (75%+)</span><span><i style="background:#fff;border:2px solid var(--ink)"></i>Current hour (IST)</span></div><div class="cpn" id="cpn"></div></div>
  <div class="card rv"><h2><span class="ic">🔥</span>Anonymous corridor summary (D5): average delay per section by hour</h2><div class="sc" style="max-height:none"><div id="heat"></div></div><p class="muted">Value = average delay in minutes for one road section on that corridor (weekday, clear weather). Cells with fewer than 5 contributing trips are hidden, so no individual commuter can be identified.</p></div>
@@ -335,12 +383,12 @@
 <footer class="seo-footer" role="contentinfo">
   <div class="wrap">
     <div>
-      <h4>MetroMind — AI Traffic Optimization Platform</h4>
+      <h3>MetroMind — AI Traffic Optimization Platform</h3>
       <p>An enterprise-grade, spatio-temporal intelligent transportation framework engineered for Bengaluru's heterogeneous urban arterial network. Developed at Alliance University as an academic research and engineering design project.</p>
       <p style="color:#7cf0e1;font-weight:600">Department of Computer Science &amp; Engineering · Alliance University</p>
     </div>
     <div>
-      <h4>Primary Corridors</h4>
+      <h3>Primary Corridors</h3>
       <ul>
         <li><a href="#plan">Outer Ring Road (ORR)</a></li>
         <li><a href="#plan">Silk Board to Electronic City</a></li>
@@ -351,7 +399,7 @@
       </ul>
     </div>
     <div>
-      <h4>Architecture &amp; Data</h4>
+      <h3>Architecture &amp; Data</h3>
       <ul>
         <li><a href="#dash">City Congestion Profile (24h)</a></li>
         <li><a href="#dash">Corridor Heatmap Matrix (D5)</a></li>
@@ -368,11 +416,13 @@
   </div>
 </footer>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <!-- Framer Motion Standalone DOM Engine (Spring Physics & Gesture Animations) -->
+  <script defer src="js/vendor/motion.js"></script>
   <!-- Leaflet 1.9.4 Interactive Maps Engine -->
-  <script src="js/vendor/leaflet.js"></script>
-  <!-- MetroMind Core Application Logic (v4 Final) -->
-  <script src="js/app.js"></script>
+  <script defer src="js/vendor/leaflet.js"></script>
+  <!-- MetroMind Core Application Logic (v4 Final + Motion Physics) -->
+  <script defer src="js/app.js"></script>
 </body>
 </html>
