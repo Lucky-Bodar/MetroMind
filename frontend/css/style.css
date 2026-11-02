@@ -1741,6 +1741,391 @@ tr.hl td { background: rgba(0, 113, 227, 0.15); }
   color: #98989d;
 }
 
+/* ============================================================
+   Google Maps Turn-by-Turn Navigation System
+   ============================================================ */
+.nav-start-btn {
+  background: linear-gradient(135deg, #0071e3 0%, #005bb5 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 4px 18px rgba(0, 113, 227, 0.45) !important;
+  padding: 10px 22px !important;
+  font-size: 13.5px !important;
+  border-radius: 9999px !important;
+  cursor: pointer;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s var(--apple-out) !important;
+}
+.nav-start-btn:hover {
+  background: linear-gradient(135deg, #0a84ff 0%, #0071e3 100%) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: 0 8px 24px rgba(0, 113, 227, 0.6) !important;
+}
+.nav-start-btn:active { transform: scale(0.96) !important; }
+.nav-btn-icon {
+  display: inline-block;
+  transform: rotate(-45deg);
+  font-size: 14px;
+}
+
+.msum-nav-btn {
+  background: linear-gradient(135deg, #30d158 0%, #248a3d 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 8px 18px !important;
+  border-radius: 9999px !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(48, 209, 88, 0.4) !important;
+  transition: all 0.2s var(--apple-out) !important;
+}
+.msum-nav-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+.msum-nav-btn:active { transform: scale(0.96); }
+
+/* Navigation Mode Active on Map */
+.mapc.nav-active .mtools,
+.mapc.nav-active .bsw,
+.mapc.nav-active .mleg,
+.mapc.nav-active .mhint,
+.mapc.nav-active #msum {
+  display: none !important;
+}
+.mapc.nav-active #mapw {
+  height: 720px;
+}
+
+/* Navigation Full Overlay */
+.nav-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1200;
+  overflow: hidden;
+  animation: fadeIn 0.3s var(--apple-out);
+}
+.nav-overlay * {
+  pointer-events: auto;
+}
+
+/* Top Guidance Banner (Google Maps Dark Emerald) */
+.nav-top-banner {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  max-width: 500px;
+  margin: 0 auto;
+  background: rgba(0, 89, 76, 0.94);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 24px;
+  box-shadow: 0 20px 48px -10px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+  animation: fadeUp 0.4s var(--apple-out);
+}
+.nav-maneuver-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+}
+.nav-arrow-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.nav-instruction-box {
+  flex: 1;
+  min-width: 0;
+}
+.nav-step-dist {
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.nav-instruction {
+  font-size: 14.5px;
+  font-weight: 500;
+  color: #bbf7d0;
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-sub-maneuver {
+  background: rgba(0, 56, 48, 0.88);
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #ffffff;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.nav-sub-then {
+  font-weight: 700;
+  color: #86efac;
+}
+.nav-sub-arrow {
+  font-size: 15px;
+  font-weight: 700;
+}
+.nav-sub-text {
+  color: #e2e8f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Right Floating Control FABs */
+.nav-fab-group {
+  position: absolute;
+  right: 16px;
+  top: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1210;
+}
+.nav-fab {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(18, 18, 24, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s var(--apple-out);
+}
+.nav-fab:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.08);
+}
+.nav-fab:active { transform: scale(0.95); }
+.compass-needle {
+  font-weight: 800;
+  font-size: 14px;
+  color: #ff453a;
+}
+
+/* Status / Traffic Pill */
+.nav-status-badge {
+  position: absolute;
+  left: 50%;
+  bottom: 96px;
+  transform: translateX(-50%);
+  background: rgba(18, 18, 24, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 7px 18px;
+  border-radius: 9999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+  animation: fadeIn 0.4s var(--apple-out);
+}
+.traffic-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #30d158;
+  box-shadow: 0 0 8px #30d158;
+}
+.traffic-dot.warn {
+  background: #ff9f0a;
+  box-shadow: 0 0 8px #ff9f0a;
+}
+.traffic-dot.err {
+  background: #ff453a;
+  box-shadow: 0 0 8px #ff453a;
+}
+
+/* Bottom Navigation Bar */
+.nav-bottom-bar {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  max-width: 500px;
+  margin: 0 auto;
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 28px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 -8px 44px rgba(0, 0, 0, 0.85);
+  animation: fadeUp 0.4s var(--apple-out);
+}
+.nav-close-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255, 69, 58, 0.15);
+  border: 1px solid rgba(255, 69, 58, 0.35);
+  color: #ff453a;
+  font-size: 18px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.2s var(--apple-out);
+}
+.nav-close-btn:hover {
+  background: rgba(255, 69, 58, 0.3);
+  transform: scale(1.08);
+}
+.nav-close-btn:active { transform: scale(0.95); }
+
+.nav-eta-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.nav-remaining-time {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.eta-mins {
+  font-size: 30px;
+  font-weight: 800;
+  color: #30d158;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.eta-unit {
+  font-size: 16px;
+  font-weight: 600;
+  color: #30d158;
+}
+.eta-eco {
+  font-size: 15px;
+  margin-left: 2px;
+}
+.nav-sub-metrics {
+  font-size: 13.5px;
+  color: #86868b;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.metric-dot {
+  opacity: 0.5;
+}
+
+.nav-pause-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #0071e3;
+  color: #ffffff;
+  border: none;
+  font-size: 16px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 113, 227, 0.4);
+  transition: all 0.2s var(--apple-out);
+}
+.nav-pause-btn:hover {
+  background: #0077ed;
+  transform: scale(1.08);
+}
+.nav-pause-btn:active { transform: scale(0.95); }
+
+/* Navigation 3D Vehicle Marker on Map */
+.nav-car-puck {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  pointer-events: none;
+}
+.nav-car-bubble {
+  position: absolute;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(18, 18, 24, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(41, 151, 255, 0.5);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+  letter-spacing: -0.01em;
+}
+.nav-car-bubble::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: rgba(41, 151, 255, 0.5);
+}
+.nav-car-body {
+  width: 40px;
+  height: 40px;
+  margin: 4px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  transition: transform 0.2s ease-out;
+}
+.nav-car-svg {
+  width: 32px;
+  height: 32px;
+  filter: drop-shadow(0 4px 12px rgba(0, 113, 227, 0.8));
+}
+.nav-car-beam {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 36px;
+  background: radial-gradient(ellipse at 50% 100%, rgba(255, 244, 180, 0.45) 0%, rgba(255, 244, 180, 0) 70%);
+  pointer-events: none;
+}
+
 /* Accessibility: Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {

@@ -153,7 +153,216 @@ function drawMap(r,q){if(!MAP)return;cancelAnimationFrame(VR);OV.clearLayers();c
   const vs=PH.map(()=>L.marker(P[0],{icon:L.divIcon({className:"",html:'<div class="veh"></div>',iconSize:[14,14]}),interactive:false,zIndexOffset:900}).addTo(OV)),D=Math.max(7000,r.es.length*1100),t0=performance.now()+1500;
   const fr=now=>{vs.forEach((m,j)=>{const k=(((now-t0)/D+PH[j])%1+1)%1,d=k*T;let i=1;while(i<cum.length-1&&cum[i]<d)i++;const f=(d-cum[i-1])/((cum[i]-cum[i-1])||1);m.setLatLng([P[i-1][0]+(P[i][0]-P[i-1][0])*f,P[i-1][1]+(P[i][1]-P[i-1][1])*f])});VR=requestAnimationFrame(fr)};VR=requestAnimationFrame(fr)}
  [["src","A"],["dst","B"]].forEach(([k,t])=>{const n=SEL[k];if(!n)return;L.marker(ll(n),{icon:L.divIcon({className:"",html:`<div class="mpin ${t}">${t}</div>`,iconSize:[26,26]}),zIndexOffset:1000}).addTo(OV).bindTooltip(sn(n),{className:"lt",permanent:true,direction:"top",offset:[0,-14]})})}
-function msumFill(R){const c=R.cur,b=R.bn,s=n=>n.split(" (")[0];$("msum").innerHTML=`<div class="msum-col"><b class="msum-val">${s(SEL.src.n)} → ${s(SEL.dst.n)}</b><small class="msum-lbl">${MODE[R.mode]} · leave ${fmt(R.st)}</small></div><div class="msum-col"><b class="msum-val">${Math.round(c.tot)} min</b><small class="msum-lbl">travel time</small></div><div class="msum-col"><b class="msum-val">${c.dist.toFixed(1)} km</b><small class="msum-lbl">distance</small></div><div class="msum-col"><b class="msum-val">${fmt(R.st+c.tot/60)}</b><small class="msum-lbl">arrival</small></div><div class="msum-col"><b class="msum-val" style="color:${col(b.cg)}">${s(b.from)} → ${s(b.to)}</b><small class="msum-lbl">bottleneck · ${b.cg}% ${lab(b.cg)}</small></div><button class="btn msum-btn" id="dn">Details ↓</button>`;$("msum").classList.add("on");$("mh").style.display="none";$("dn").onclick=()=>$("via").scrollIntoView({behavior:"smooth"})}
+function msumFill(R){const c=R.cur,b=R.bn,s=n=>n.split(" (")[0];$("msum").innerHTML=`<div class="msum-col"><b class="msum-val">${s(SEL.src.n)} → ${s(SEL.dst.n)}</b><small class="msum-lbl">${MODE[R.mode]} · leave ${fmt(R.st)}</small></div><div class="msum-col"><b class="msum-val">${Math.round(c.tot)} min</b><small class="msum-lbl">travel time</small></div><div class="msum-col"><b class="msum-val">${c.dist.toFixed(1)} km</b><small class="msum-lbl">distance</small></div><div class="msum-col"><b class="msum-val">${fmt(R.st+c.tot/60)}</b><small class="msum-lbl">arrival</small></div><div class="msum-col"><b class="msum-val" style="color:${col(b.cg)}">${s(b.from)} → ${s(b.to)}</b><small class="msum-lbl">bottleneck · ${b.cg}% ${lab(b.cg)}</small></div><button class="btn msum-nav-btn" id="msum-nav-btn">➤ Start</button><button class="btn msum-btn" id="dn">Details ↓</button>`;$("msum").classList.add("on");$("mh").style.display="none";$("dn").onclick=()=>$("via").scrollIntoView({behavior:"smooth"});if($("msum-nav-btn"))$("msum-nav-btn").onclick=()=>startNav()}
+
+/* ---------- Live Turn-by-Turn Navigation Engine (Google Maps Style) ---------- */
+let NAV_ACTIVE=false,NAV_TIMER=null,NAV_CAR_MARKER=null,NAV_VOICE=true,NAV_SPEED=2,NAV_PAUSED=false;
+let NAV_STEPS=[],NAV_STEP_IDX=0,NAV_STEP_PROG=0,NAV_TOTAL_DIST=0,NAV_TOTAL_TIME=0;
+
+function calcBearing(a,b){
+  const lat1=a[0]*Math.PI/180,lat2=b[0]*Math.PI/180;
+  const dLng=(b[1]-a[1])*Math.PI/180;
+  const y=Math.sin(dLng)*Math.cos(lat2);
+  const x=Math.cos(lat1)*Math.sin(lat2)-Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLng);
+  return (Math.atan2(y,x)*180/Math.PI+360)%360;
+}
+
+function getManeuver(prevB,curB,street,isFirst,isLast){
+  if(isFirst){
+    const cardinals=["North","North-East","East","South-East","South","South-West","West","North-West"];
+    const card=cardinals[Math.round(curB/45)%8];
+    return {arrow:"↑",action:`Head ${card.toLowerCase()}`,street:`on ${street}`};
+  }
+  if(isLast) return {arrow:"🏁",action:"Arrive at destination",street:street};
+  const diff=((curB-prevB+540)%360)-180;
+  if(Math.abs(diff)<25) return {arrow:"↑",action:"Continue straight",street:`onto ${street}`};
+  if(diff>=25&&diff<65) return {arrow:"↗",action:"Bear right",street:`towards ${street}`};
+  if(diff>=65&&diff<125) return {arrow:"↱",action:"Turn right",street:`onto ${street}`};
+  if(diff>=125) return {arrow:"⮡",action:"Sharp right",street:`onto ${street}`};
+  if(diff<=-25&&diff>-65) return {arrow:"↖",action:"Bear left",street:`towards ${street}`};
+  if(diff<=-65&&diff>-125) return {arrow:"↰",action:"Turn left",street:`onto ${street}`};
+  return {arrow:"⮠",action:"Sharp left",street:`onto ${street}`};
+}
+
+function speakNav(text){
+  if(!NAV_VOICE||!window.speechSynthesis) return;
+  try{
+    window.speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.rate=1.05;u.pitch=1.0;u.lang="en-IN";
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+function startNav(){
+  if(!RES||!RES.es||!RES.es.length){toast("Analyse a trip first to start navigation");return}
+  NAV_ACTIVE=true;NAV_PAUSED=false;NAV_STEP_IDX=0;NAV_STEP_PROG=0;
+  if($("nav-play-icon")) $("nav-play-icon").textContent="⏸";
+
+  const es=RES.es,rows=RES.cur.rows,pts=[ll(N[es[0].a])].concat(es.map(e=>ll(N[e.to])));
+  NAV_STEPS=[];let prevB=0;
+  for(let i=0;i<es.length;i++){
+    const p1=pts[i],p2=pts[i+1],b=calcBearing(p1,p2);
+    const street=es[i].corr||rows[i].to.split(" (")[0];
+    const m=getManeuver(prevB,b,street,i===0,false);
+    prevB=b;
+    NAV_STEPS.push({p1,p2,bearing:b,len:rows[i].len,mins:rows[i].mins,cg:rows[i].cg,street,arrow:m.arrow,action:m.action,desc:m.street});
+  }
+  NAV_STEPS.push({p1:pts[pts.length-1],p2:pts[pts.length-1],bearing:prevB,len:0,mins:0,cg:0,street:SEL.dst.n.split(" (")[0],arrow:"🏁",action:"You have arrived",desc:SEL.dst.n.split(" (")[0]});
+  NAV_TOTAL_DIST=RES.cur.dist;NAV_TOTAL_TIME=RES.cur.tot;
+
+  $("mapc").classList.add("nav-active");
+  $("nav-overlay").style.display="block";
+  $("mapsec").scrollIntoView({behavior:"smooth",block:"start"});
+
+  if(NAV_CAR_MARKER&&MAP) MAP.removeLayer(NAV_CAR_MARKER);
+  const startPt=NAV_STEPS[0].p1;
+  const carHtml=`
+    <div class="nav-car-puck">
+      <div class="nav-car-bubble" id="nav-car-bubble">${NAV_STEPS[0].street}</div>
+      <div class="nav-car-body" id="nav-car-body" style="transform:rotate(${NAV_STEPS[0].bearing}deg)">
+        <div class="nav-car-beam"></div>
+        <svg class="nav-car-svg" viewBox="0 0 48 48" fill="none">
+          <rect x="12" y="6" width="24" height="36" rx="8" fill="#2997ff" stroke="#ffffff" stroke-width="2.5"/>
+          <rect x="15" y="14" width="18" height="12" rx="4" fill="#0f172a"/>
+          <circle cx="16" cy="8" r="3" fill="#fffae0"/>
+          <circle cx="32" cy="8" r="3" fill="#fffae0"/>
+          <rect x="14" y="38" width="5" height="3" rx="1.5" fill="#ff453a"/>
+          <rect x="29" y="38" width="5" height="3" rx="1.5" fill="#ff453a"/>
+        </svg>
+      </div>
+    </div>`;
+  NAV_CAR_MARKER=L.marker(startPt,{
+    icon:L.divIcon({className:"",html:carHtml,iconSize:[48,48],iconAnchor:[24,24]}),
+    zIndexOffset:2000
+  }).addTo(OV);
+
+  MAP.flyTo(startPt,16,{duration:1});
+  updateNavUI();
+  speakNav(`${NAV_STEPS[0].action} ${NAV_STEPS[0].desc}`);
+
+  clearInterval(NAV_TIMER);
+  NAV_TIMER=setInterval(navTick,80);
+  toast("Navigation started · Live turn-by-turn tracking");
+}
+
+function stopNav(){
+  NAV_ACTIVE=false;clearInterval(NAV_TIMER);
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+  if(NAV_CAR_MARKER&&MAP){MAP.removeLayer(NAV_CAR_MARKER);NAV_CAR_MARKER=null}
+  $("mapc").classList.remove("nav-active");
+  $("nav-overlay").style.display="none";
+  if(RES) zoomTo(fitBox(RES.es));
+  toast("Navigation ended");
+}
+
+function toggleNavPlay(){
+  NAV_PAUSED=!NAV_PAUSED;
+  if($("nav-play-icon")) $("nav-play-icon").textContent=NAV_PAUSED?"▶":"⏸";
+  toast(NAV_PAUSED?"Navigation paused":"Navigation resumed");
+}
+
+function toggleNavVoice(){
+  NAV_VOICE=!NAV_VOICE;
+  if($("nav-voice-icon")) $("nav-voice-icon").textContent=NAV_VOICE?"🔊":"🔇";
+  toast(NAV_VOICE?"Voice guidance enabled":"Voice guidance muted");
+}
+
+function cycleNavSpeed(){
+  const speeds=[1,2,4];
+  const next=speeds[(speeds.indexOf(NAV_SPEED)+1)%speeds.length];
+  NAV_SPEED=next;
+  if($("nav-speed-val")) $("nav-speed-val").textContent=next+"x";
+  toast("Simulation speed: "+next+"x");
+}
+
+function recenterNav(){
+  if(!NAV_ACTIVE||!NAV_STEPS.length) return;
+  const step=NAV_STEPS[NAV_STEP_IDX];
+  if(!step) return;
+  const lat=step.p1[0]+(step.p2[0]-step.p1[0])*NAV_STEP_PROG;
+  const lng=step.p1[1]+(step.p2[1]-step.p1[1])*NAV_STEP_PROG;
+  MAP.flyTo([lat,lng],16,{duration:0.6});
+  toast("Re-centred vehicle");
+}
+
+function updateNavUI(){
+  if(!NAV_STEPS.length||NAV_STEP_IDX>=NAV_STEPS.length) return;
+  const step=NAV_STEPS[NAV_STEP_IDX];
+  const nextStep=NAV_STEPS[NAV_STEP_IDX+1];
+
+  if($("nav-arrow")) $("nav-arrow").textContent=step.arrow;
+  if($("nav-step-dist")) $("nav-step-dist").textContent=step.action;
+  if($("nav-step-instruction")) $("nav-step-instruction").textContent=step.desc;
+
+  if(nextStep&&nextStep.action!=="You have arrived"){
+    $("nav-sub-maneuver").style.display="flex";
+    if($("nav-sub-arrow")) $("nav-sub-arrow").textContent=nextStep.arrow;
+    if($("nav-sub-text")) $("nav-sub-text").textContent=`${nextStep.action} ${nextStep.desc}`;
+  }else{
+    $("nav-sub-maneuver").style.display="none";
+  }
+
+  let remDist=0,remTime=0;
+  for(let i=NAV_STEP_IDX;i<NAV_STEPS.length-1;i++){
+    const s=NAV_STEPS[i],w=i===NAV_STEP_IDX?(1-NAV_STEP_PROG):1;
+    remDist+=s.len*w;remTime+=s.mins*w;
+  }
+
+  if($("nav-rem-mins")) $("nav-rem-mins").textContent=Math.max(1,Math.round(remTime));
+  if($("nav-rem-dist")) $("nav-rem-dist").textContent=remDist.toFixed(1)+" km";
+  const arrH=ist().h+remTime/60;
+  if($("nav-eta-clock")) $("nav-eta-clock").textContent=fmt(arrH);
+
+  const cg=step.cg||0;
+  const dot=$("nav-traffic-dot"),stat=$("nav-traffic-status");
+  if(dot&&stat){
+    dot.className="traffic-dot "+(cg>=75?"err":cg>=55?"warn":"");
+    stat.textContent=cg>=55?`Heavy traffic (${cg}%) on ${step.street}`:`Optimal flow · ${step.street}`;
+  }
+}
+
+function navTick(){
+  if(!NAV_ACTIVE||NAV_PAUSED||!NAV_STEPS.length) return;
+  if(NAV_STEP_IDX>=NAV_STEPS.length-1){
+    speakNav("You have arrived at your destination.");
+    toast("🎉 You have arrived at "+SEL.dst.n.split(" (")[0]);
+    stopNav();
+    return;
+  }
+
+  const step=NAV_STEPS[NAV_STEP_IDX];
+  const delta=(0.018*NAV_SPEED)/Math.max(0.4,step.len);
+  NAV_STEP_PROG+=delta;
+
+  if(NAV_STEP_PROG>=1){
+    NAV_STEP_PROG=0;
+    NAV_STEP_IDX++;
+    if(NAV_STEP_IDX<NAV_STEPS.length-1){
+      const next=NAV_STEPS[NAV_STEP_IDX];
+      speakNav(`In ${next.len<1?Math.round(next.len*1000)+" meters":next.len.toFixed(1)+" kilometers"}, ${next.action} ${next.desc}`);
+    }
+  }
+
+  const cur=NAV_STEPS[NAV_STEP_IDX];
+  if(!cur) return;
+  const lat=cur.p1[0]+(cur.p2[0]-cur.p1[0])*NAV_STEP_PROG;
+  const lng=cur.p1[1]+(cur.p2[1]-cur.p1[1])*NAV_STEP_PROG;
+
+  if(NAV_CAR_MARKER){
+    NAV_CAR_MARKER.setLatLng([lat,lng]);
+    const bEl=document.getElementById("nav-car-body");
+    if(bEl) bEl.style.transform=`rotate(${cur.bearing}deg)`;
+    const bubble=document.getElementById("nav-car-bubble");
+    if(bubble) bubble.textContent=cur.street;
+  }
+
+  if(Math.random()<0.25){
+    MAP.panTo([lat,lng],{animate:true,duration:0.3});
+  }
+
+  updateNavUI();
+}
 /* ---------- v3: live clock, feed, pipeline bar ---------- */
 function ist(){const o={};new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Kolkata",hour12:false,hour:"2-digit",minute:"2-digit",second:"2-digit",weekday:"short"}).formatToParts(new Date()).forEach(x=>o[x.type]=x.value);const hh=String(+o.hour%24).padStart(2,"0");return{h:(+o.hour%24)+(+o.minute)/60+(+o.second)/3600,t:hh+":"+o.minute+":"+o.second,hm:hh+":"+o.minute,we:/Sat|Sun/.test(o.weekday)}}
 let LASTSYNC=Date.now();
@@ -303,6 +512,13 @@ function setup(){ac("src");ac("dst");const bs=[...document.querySelectorAll("#na
  $("go").onclick=()=>{if(window.Motion&&Motion.animate){try{Motion.animate("#go",{scale:[1,0.95,1.02,1]},{duration:0.25})}catch(err){}}run(true)};["mode","day","wx","live","inc"].forEach(i=>$(i).onchange=()=>{if(SEL.src&&SEL.dst&&RES)run(false)});$("tm").onchange=()=>{if(SEL.src&&SEL.dst&&RES)run(false)};
  $("swap").onclick=()=>{if(window.Motion&&Motion.animate){try{Motion.animate("#swap",{rotate:[0,180]},{duration:0.35,easing:[0.34,1.56,0.64,1]})}catch(err){}}const a=SEL.src,b=SEL.dst;SEL.src=b;SEL.dst=a;$("src").value=b?b.n:"";$("dst").value=a?a.n:"";$("src").classList.toggle("ok",!!b);$("dst").classList.toggle("ok",!!a);drawMap(RES&&0);if(a&&b&&RES)run(false);else drawMap(null)};
   $("fit").onclick=()=>RES?zoomTo(fitBox(RES.es.concat(RES.alt?RES.alt.es:[]))):toast("Analyse a trip first");$("city").onclick=()=>zoomTo([0,0,MW,MH]);
+  if($("start-nav")) $("start-nav").onclick=()=>startNav();
+  if($("nav-exit-btn")) $("nav-exit-btn").onclick=()=>stopNav();
+  if($("nav-play-pause-btn")) $("nav-play-pause-btn").onclick=()=>toggleNavPlay();
+  if($("nav-voice-btn")) $("nav-voice-btn").onclick=()=>toggleNavVoice();
+  if($("nav-speed-btn")) $("nav-speed-btn").onclick=()=>cycleNavSpeed();
+  if($("nav-recenter-btn")) $("nav-recenter-btn").onclick=()=>recenterNav();
+  if($("nav-compass-btn")) $("nav-compass-btn").onclick=()=>recenterNav();
  $("cons").onchange=()=>$("save").disabled=!$("cons").checked;
  $("save").onclick=async()=>{if(!LAST||!$("cons").checked)return;
   const cs=[...new Set(LAST.es.filter(e=>e.art).map(e=>e.corr))];

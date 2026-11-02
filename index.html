@@ -273,6 +273,66 @@
   <div class="mtools" role="toolbar" aria-label="Map Navigation Tools"><button id="fit">Fit route</button><button id="city">Full city</button></div>
   <div id="mapw" aria-label="Interactive Leaflet Map"></div><div class="msum" id="msum"></div>
   <div class="mhint" id="mh">Tip: click any node on the map to set it as origin or destination</div>
+
+  <!-- Turn-by-Turn Navigation Overlay (Google Maps Style) -->
+  <div class="nav-overlay" id="nav-overlay" style="display:none;" aria-label="Turn-by-turn Navigation Mode">
+    <!-- Top Guidance Banner (Google Maps Dark Emerald Glass) -->
+    <div class="nav-top-banner">
+      <div class="nav-maneuver-main">
+        <div class="nav-arrow-badge" id="nav-arrow">↑</div>
+        <div class="nav-instruction-box">
+          <div class="nav-step-dist" id="nav-step-dist">Head east</div>
+          <div class="nav-instruction" id="nav-step-instruction">on Old Airport Road</div>
+        </div>
+      </div>
+      <div class="nav-sub-maneuver" id="nav-sub-maneuver">
+        <span class="nav-sub-then">Then</span>
+        <span class="nav-sub-arrow" id="nav-sub-arrow">↰</span>
+        <span class="nav-sub-text" id="nav-sub-text">Turn left towards Marathahalli</span>
+      </div>
+    </div>
+
+    <!-- Floating Action FABs on the Right -->
+    <div class="nav-fab-group">
+      <button type="button" class="nav-fab" id="nav-compass-btn" title="North orientation" aria-label="North orientation">
+        <span class="compass-needle">N</span>
+      </button>
+      <button type="button" class="nav-fab" id="nav-voice-btn" title="Toggle voice guidance" aria-label="Toggle voice guidance">
+        <span id="nav-voice-icon">🔊</span>
+      </button>
+      <button type="button" class="nav-fab" id="nav-speed-btn" title="Simulation speed" aria-label="Simulation speed">
+        <span id="nav-speed-val">2x</span>
+      </button>
+      <button type="button" class="nav-fab" id="nav-recenter-btn" title="Re-centre vehicle on map" aria-label="Re-centre vehicle on map">
+        <span>⌖</span>
+      </button>
+    </div>
+
+    <!-- Dynamic Traffic / Bottleneck Alert Badge -->
+    <div class="nav-status-badge" id="nav-traffic-badge">
+      <span class="traffic-dot" id="nav-traffic-dot"></span>
+      <span id="nav-traffic-status">Fastest route · Normal grip</span>
+    </div>
+
+    <!-- Bottom Navigation Bar (Google Maps Style) -->
+    <div class="nav-bottom-bar">
+      <button type="button" class="nav-close-btn" id="nav-exit-btn" aria-label="Exit Navigation Mode">✕</button>
+      <div class="nav-eta-box">
+        <div class="nav-remaining-time">
+          <span class="eta-mins" id="nav-rem-mins">--</span> <span class="eta-unit">min</span>
+          <span class="eta-eco" title="Eco-optimal route">🌱</span>
+        </div>
+        <div class="nav-sub-metrics">
+          <span id="nav-rem-dist">-- km</span>
+          <span class="metric-dot">·</span>
+          <span id="nav-eta-clock">--:--</span>
+        </div>
+      </div>
+      <button type="button" class="nav-pause-btn" id="nav-play-pause-btn" aria-label="Play or pause navigation simulation">
+        <span id="nav-play-icon">⏸</span>
+      </button>
+    </div>
+  </div>
   </div><div class="ropts" id="ropts"></div></div></section>
 <main role="main">
  <div class="card" id="pipe" role="status" aria-live="polite"><div class="spin"></div><b>Running the MetroMind multi-dataset pipeline…</b><div class="pst" id="pst"></div></div>
@@ -280,6 +340,9 @@
   <div class="via-wrap">
     <div class="via rv" id="via"></div>
     <div class="action-bar" id="action-bar">
+      <button type="button" class="btn nav-start-btn" id="start-nav" aria-label="Start Turn-by-Turn Navigation">
+        <span class="nav-btn-icon">➤</span> Start
+      </button>
       <button class="btn sec-tool" id="copy-summary" aria-label="Copy route summary to clipboard">📋 Copy Route Summary</button>
       <button class="btn sec-tool" id="share-link" aria-label="Copy direct shareable route link">🔗 Share Route</button>
     </div>
