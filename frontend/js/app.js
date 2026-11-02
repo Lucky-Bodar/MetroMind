@@ -123,7 +123,7 @@ function evalP(es,st,mode,c,live,prim){let clk=st,tot=0,fr=0,dist=0,ok=true,rows
 const nodeIx=o=>N.indexOf(o);
 /* ---------- v3: map (Leaflet) ---------- */
 const MW=620,MH=790,px=n=>[0,0];
-let MAP,BL={},OV,CB="normal",VR=0,tWarn=false,VEL=0;
+let MAP,BL={},OV,CB="night",VR=0,tWarn=false,VEL=0;
 const BCOL={normal:"#e6ecf2",night:"#0b1a30",sat:"#1b2a1f"};
 function initMap(){
  MAP=L.map("mapw",{zoomControl:false,minZoom:9,maxZoom:18,center:[12.97,77.62],zoom:11,zoomSnap:.25,maxBounds:[[12.55,77.15],[13.5,78.05]],maxBoundsViscosity:.8});
@@ -136,7 +136,7 @@ function initMap(){
  BL.sat=L.layerGroup([tl("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{attribution:"Imagery © Esri"}),tl("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",{zIndex:3})]);
  const te=()=>{if(!tWarn){tWarn=true;toast("Map tiles need an internet connection. Routes still work on the offline grid.")}};
  [BL.normal].forEach(l=>l.on("tileerror",te));[BL.night,BL.sat].forEach(g=>g.eachLayer(l=>l.on("tileerror",te)));
- BL.grid.addTo(MAP);BL.normal.addTo(MAP);OV=L.layerGroup().addTo(MAP)}
+ BL.grid.addTo(MAP);BL.night.addTo(MAP);OV=L.layerGroup().addTo(MAP)}
 function bPill(){const b=document.querySelector("#bsw button.on"),p=$("bpill");p.style.left=b.offsetLeft+"px";p.style.width=b.offsetWidth+"px"}
 function setBase(k){if(k===CB)return;const mw=$("mapw");mw.style.opacity=.2;setTimeout(()=>mw.style.opacity=1,450);[BL.normal,BL.night,BL.sat].forEach(l=>MAP.hasLayer(l)&&MAP.removeLayer(l));CB=k;BL[k].addTo(MAP);BL.grid.redraw();$("mapc").dataset.b=k;document.querySelectorAll("#bsw button").forEach(b=>b.classList.toggle("on",b.dataset.b===k));bPill();drawMap(RES,true);toast({normal:"Normal map",night:"Night mode",sat:"Satellite view"}[k])}
 function nClick(n){if(!SEL.src||(SEL.src&&SEL.dst))pick("src",n),SEL.dst=null,$("dst").value="",$("dst").classList.remove("ok");else pick("dst",n);toast((SEL.dst?"Destination":"Source")+" set: "+n.n)}
@@ -153,7 +153,7 @@ function drawMap(r,q){if(!MAP)return;cancelAnimationFrame(VR);OV.clearLayers();c
   const vs=PH.map(()=>L.marker(P[0],{icon:L.divIcon({className:"",html:'<div class="veh"></div>',iconSize:[14,14]}),interactive:false,zIndexOffset:900}).addTo(OV)),D=Math.max(7000,r.es.length*1100),t0=performance.now()+1500;
   const fr=now=>{vs.forEach((m,j)=>{const k=(((now-t0)/D+PH[j])%1+1)%1,d=k*T;let i=1;while(i<cum.length-1&&cum[i]<d)i++;const f=(d-cum[i-1])/((cum[i]-cum[i-1])||1);m.setLatLng([P[i-1][0]+(P[i][0]-P[i-1][0])*f,P[i-1][1]+(P[i][1]-P[i-1][1])*f])});VR=requestAnimationFrame(fr)};VR=requestAnimationFrame(fr)}
  [["src","A"],["dst","B"]].forEach(([k,t])=>{const n=SEL[k];if(!n)return;L.marker(ll(n),{icon:L.divIcon({className:"",html:`<div class="mpin ${t}">${t}</div>`,iconSize:[26,26]}),zIndexOffset:1000}).addTo(OV).bindTooltip(sn(n),{className:"lt",permanent:true,direction:"top",offset:[0,-14]})})}
-function msumFill(R){const c=R.cur,b=R.bn,s=n=>n.split(" (")[0];$("msum").innerHTML=`<div><b>${s(SEL.src.n)} → ${s(SEL.dst.n)}</b><small>${MODE[R.mode]} · leave ${fmt(R.st)}</small></div><div><b>${Math.round(c.tot)} min</b><small>travel time</small></div><div><b>${c.dist.toFixed(1)} km</b><small>distance</small></div><div><b>${fmt(R.st+c.tot/60)}</b><small>arrival</small></div><div><b style="color:${col(b.cg)}">${s(b.from)} → ${s(b.to)}</b><small>bottleneck · ${b.cg}% ${lab(b.cg)}</small></div><button class="btn" id="dn">Details ↓</button>`;$("msum").classList.add("on");$("mh").style.display="none";$("dn").onclick=()=>$("via").scrollIntoView({behavior:"smooth"})}
+function msumFill(R){const c=R.cur,b=R.bn,s=n=>n.split(" (")[0];$("msum").innerHTML=`<div class="msum-col"><b class="msum-val">${s(SEL.src.n)} → ${s(SEL.dst.n)}</b><small class="msum-lbl">${MODE[R.mode]} · leave ${fmt(R.st)}</small></div><div class="msum-col"><b class="msum-val">${Math.round(c.tot)} min</b><small class="msum-lbl">travel time</small></div><div class="msum-col"><b class="msum-val">${c.dist.toFixed(1)} km</b><small class="msum-lbl">distance</small></div><div class="msum-col"><b class="msum-val">${fmt(R.st+c.tot/60)}</b><small class="msum-lbl">arrival</small></div><div class="msum-col"><b class="msum-val" style="color:${col(b.cg)}">${s(b.from)} → ${s(b.to)}</b><small class="msum-lbl">bottleneck · ${b.cg}% ${lab(b.cg)}</small></div><button class="btn msum-btn" id="dn">Details ↓</button>`;$("msum").classList.add("on");$("mh").style.display="none";$("dn").onclick=()=>$("via").scrollIntoView({behavior:"smooth"})}
 /* ---------- v3: live clock, feed, pipeline bar ---------- */
 function ist(){const o={};new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Kolkata",hour12:false,hour:"2-digit",minute:"2-digit",second:"2-digit",weekday:"short"}).formatToParts(new Date()).forEach(x=>o[x.type]=x.value);const hh=String(+o.hour%24).padStart(2,"0");return{h:(+o.hour%24)+(+o.minute)/60+(+o.second)/3600,t:hh+":"+o.minute+":"+o.second,hm:hh+":"+o.minute,we:/Sat|Sun/.test(o.weekday)}}
 let LASTSYNC=Date.now();
