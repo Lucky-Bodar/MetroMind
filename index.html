@@ -246,7 +246,13 @@
    <div class="swapw"><button class="swap" id="swap" title="Swap origin and destination" aria-label="Swap origin and destination hubs">⇅</button></div>
    <div class="fld"><label for="dst">Destination / Arrival Hub</label><input id="dst" autocomplete="off" placeholder="e.g. Electronic City, Airport, Silk Board…"><div class="list" id="dstL" role="listbox"></div></div>
    <div class="g2">
-    <div class="sel"><label for="tm">Departure time <a id="now" class="nowb" role="button" tabindex="0">⏱ use live time</a></label><input type="time" id="tm" value="08:30"></div>
+    <div class="sel">
+      <div class="fld-lbl">
+        <label for="tm">Departure time</label>
+        <button type="button" id="now" class="live-pill" aria-label="Live time: Set departure time to current IST"><i class="live-dot" aria-hidden="true"></i>Live time</button>
+      </div>
+      <input type="time" id="tm" value="08:30">
+    </div>
     <div class="sel"><label for="mode">Mode of travel</label><select id="mode" aria-label="Mode of travel"><option value="car">Car (Personal vehicle)</option><option value="bike">Two-wheeler (Motorcycle/Scooter)</option><option value="bus">BMTC Public Transit Bus</option></select></div>
     <div class="sel"><label for="day">Day type</label><select id="day" aria-label="Day type schedule"><option value="wd">Weekday (Standard arterial commute)</option><option value="we">Weekend / Holiday profile</option></select></div>
     <div class="sel"><label for="wx">Weather (D4)</label><select id="wx" aria-label="Weather conditions"><option value="clear">Clear weather (Normal grip)</option><option value="rain">Monsoon rain (-18% friction)</option><option value="heavy">Heavy downpour / Flooding</option></select></div>

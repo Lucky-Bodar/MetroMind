@@ -162,25 +162,25 @@ function cityIdx(){const d=ist(),cc={we:d.we,wx:"clear",inc:""};let s=0,n=0;AD.f
 function sync(){const d=ist(),ci=cityIdx();LASTSYNC=Date.now();$("ci").textContent=ci+"% "+lab(ci);$("ci").style.color=col(ci);$("slot").textContent=String(Math.floor(d.h*12)).padStart(3,"0")+" / 288";$("rd").textContent=(Math.floor(d.h*720)*17).toLocaleString("en-IN");["lv","d3c"].forEach(i=>{$(i).classList.add("fl");setTimeout(()=>$(i).classList.remove("fl"),700)});tick()}
 function pbSet(k){document.querySelectorAll(".pb").forEach((b,i)=>{b.classList.toggle("on",i===k);b.classList.toggle("done",i<k||k===5)})}
 /* ---------- v3: scroll-driven road scene ---------- */
-const RD=(()=>{const cv=$("road"),cx=cv.getContext("2d"),hero=$("top"),CC=["#ff5a5f","#ffb020","#4cc9f0","#c7f464","#f1f5f9","#a78bfa","#14b8a6","#ff8fab"],LS=[95,135,-110],LY=[.2,.5,.8];let W=0,Hh=0,off=0,last=0,st=[],ly=[],cars=[],dist=[0,0,0];
+const RD=(()=>{const cv=$("road"),cx=cv.getContext("2d"),hero=$("top"),CC=["#2997ff","#0071e3","#86868b","#f5f5f7","#ff453a","#30d158","#ffd60a","#bf5af2"],LS=[95,135,-110],LY=[.2,.5,.8];let W=0,Hh=0,off=0,last=0,st=[],ly=[],cars=[],dist=[0,0,0];
  function size(){const d=Math.min(2,devicePixelRatio||1);W=hero.clientWidth;Hh=hero.clientHeight;cv.width=W*d;cv.height=Hh*d;cx.setTransform(d,0,0,d,0,0);seed()}
  function seed(){st=[...Array(90)].map(()=>({x:Math.random()*W,y:Math.random()*Hh*.5,r:Math.random()*1.2+.3,p:Math.random()*6}));
   ly=[0,1,2].map(l=>{const a=[];let x=0;while(x<W+300){const w=34+Math.random()*(46+l*12),h=(50+Math.random()*(80+l*35))*(1+l*.25);a.push({x,w,h,s:Math.random()});x+=w+Math.random()*8}a.T=x;return a});
   cars=[];for(let l=0;l<3;l++)for(let k=0;k<5;k++)cars.push({l,k,c:CC[(l*5+k)%8],w:56+Math.random()*24})}
  function car(c,x,y,sc){cx.save();cx.translate(x,y);cx.scale(LS[c.l]<0?-sc:sc,sc);const w=c.w,h=22;
-  const g=cx.createLinearGradient(w/2,0,w/2+80,0);g.addColorStop(0,"rgba(255,244,180,.45)");g.addColorStop(1,"rgba(255,244,180,0)");cx.fillStyle=g;cx.beginPath();cx.moveTo(w/2-4,-4);cx.lineTo(w/2+80,-16);cx.lineTo(w/2+80,16);cx.lineTo(w/2-4,4);cx.fill();
-  cx.fillStyle="rgba(0,0,0,.4)";cx.fillRect(-w/2+3,h/2-2,w-6,5);cx.fillStyle=c.c;cx.beginPath();cx.roundRect(-w/2,-h/2,w,h,7);cx.fill();cx.fillStyle="rgba(10,25,50,.78)";cx.beginPath();cx.roundRect(-w/4,-h/2+3,w/2,h-9,4);cx.fill();
-  cx.fillStyle="#fff7c2";cx.fillRect(w/2-4,-h/2+3,4,5);cx.fillRect(w/2-4,h/2-9,4,5);cx.fillStyle="#ff3b3b";cx.fillRect(-w/2,-h/2+3,3,5);cx.fillRect(-w/2,h/2-9,3,5);cx.fillStyle="#0a0a0a";cx.fillRect(-w/2+8,h/2-3,11,5);cx.fillRect(w/2-19,h/2-3,11,5);cx.restore()}
+  const g=cx.createLinearGradient(w/2,0,w/2+75,0);g.addColorStop(0,"rgba(255,244,180,.32)");g.addColorStop(1,"rgba(255,244,180,0)");cx.fillStyle=g;cx.beginPath();cx.moveTo(w/2-4,-4);cx.lineTo(w/2+75,-14);cx.lineTo(w/2+75,14);cx.lineTo(w/2-4,4);cx.fill();
+  cx.fillStyle="rgba(0,0,0,.5)";cx.fillRect(-w/2+3,h/2-2,w-6,5);cx.fillStyle=c.c;cx.beginPath();cx.roundRect(-w/2,-h/2,w,h,6);cx.fill();cx.fillStyle="rgba(8,10,16,.85)";cx.beginPath();cx.roundRect(-w/4,-h/2+3,w/2,h-9,3.5);cx.fill();
+  cx.fillStyle="#fff7c2";cx.fillRect(w/2-4,-h/2+3,3.5,4.5);cx.fillRect(w/2-4,h/2-8,3.5,4.5);cx.fillStyle="#ff453a";cx.fillRect(-w/2,-h/2+3,2.5,4.5);cx.fillRect(-w/2,h/2-8,2.5,4.5);cx.fillStyle="#050608";cx.fillRect(-w/2+8,h/2-3,10,4.5);cx.fillRect(w/2-18,h/2-3,10,4.5);cx.restore()}
  function draw(t){const sy=scrollY,rt=Hh-190,cam=off+sy*1.2;
-  let g=cx.createLinearGradient(0,0,0,Hh);g.addColorStop(0,"#050d1f");g.addColorStop(.6,"#0f2a52");g.addColorStop(1,"#1a4a6e");cx.fillStyle=g;cx.fillRect(0,0,W,Hh);
-  st.forEach(s=>{cx.globalAlpha=.4+.5*Math.sin(t*1.5+s.p);cx.fillStyle="#fff";cx.beginPath();cx.arc(s.x,s.y-sy*.03,s.r,0,6.3);cx.fill()});cx.globalAlpha=1;
-  const mg=cx.createRadialGradient(W*.82,Hh*.16-sy*.05,4,W*.82,Hh*.16-sy*.05,90);mg.addColorStop(0,"rgba(255,244,200,.95)");mg.addColorStop(.18,"rgba(255,244,200,.9)");mg.addColorStop(.19,"rgba(255,244,200,.14)");mg.addColorStop(1,"rgba(255,244,200,0)");cx.fillStyle=mg;cx.fillRect(W*.82-100,Hh*.16-sy*.05-100,200,200);
-  const F=[.12,.28,.5],C=["#0d2146","#122f5c","#1a4573"];
-  ly.forEach((a,l)=>{const sh=((cam*F[l])%a.T+a.T)%a.T;a.forEach(b=>{let x=b.x-sh;if(x<-b.w)x+=a.T;if(x>W)return;cx.fillStyle=C[l];cx.fillRect(x,rt-b.h,b.w,b.h+8);if(l>0){for(let wy=rt-b.h+8;wy<rt-8;wy+=11)for(let wx=x+5;wx<x+b.w-6;wx+=9){const v=Math.sin(wx*12.9+wy*7.7+b.s*50+Math.floor(t/3+b.s*9))*.5+.5;if(v>.62){cx.fillStyle=v>.9?"rgba(255,226,140,.95)":"rgba(255,210,120,.55)";cx.fillRect(wx,wy,4,5)}}}})});
-  cx.fillStyle="#1d2d4a";cx.fillRect(0,rt-14,W,14);
-  for(let x=-((cam*1)%320);x<W+320;x+=320){cx.fillStyle="#2c3f63";cx.fillRect(x,rt-62,3,50);cx.fillRect(x,rt-62,16,3);const lg=cx.createRadialGradient(x+14,rt-58,1,x+14,rt-58,60);lg.addColorStop(0,"rgba(255,220,140,.55)");lg.addColorStop(1,"rgba(255,220,140,0)");cx.fillStyle=lg;cx.fillRect(x-50,rt-120,130,130)}
-  const rg=cx.createLinearGradient(0,rt,0,rt+150);rg.addColorStop(0,"#17233a");rg.addColorStop(1,"#0a111f");cx.fillStyle=rg;cx.fillRect(0,rt,W,150);cx.fillStyle="#2b3c5c";cx.fillRect(0,rt+150,W,40);
-  cx.strokeStyle="rgba(255,255,255,.55)";cx.lineWidth=3;cx.setLineDash([34,26]);cx.lineDashOffset=(cam*1)%60;[rt+50,rt+100].forEach(y=>{cx.beginPath();cx.moveTo(0,y);cx.lineTo(W,y);cx.stroke()});cx.setLineDash([]);
+  cx.fillStyle="#07080c";cx.fillRect(0,0,W,Hh);
+  st.forEach(s=>{cx.globalAlpha=.3+.4*Math.sin(t*1.5+s.p);cx.fillStyle="#ffffff";cx.beginPath();cx.arc(s.x,s.y-sy*.03,s.r,0,6.3);cx.fill()});cx.globalAlpha=1;
+  const mg=cx.createRadialGradient(W*.82,Hh*.16-sy*.05,3,W*.82,Hh*.16-sy*.05,80);mg.addColorStop(0,"rgba(255,255,255,.9)");mg.addColorStop(.18,"rgba(240,242,248,.75)");mg.addColorStop(.19,"rgba(240,242,248,.08)");mg.addColorStop(1,"rgba(240,242,248,0)");cx.fillStyle=mg;cx.fillRect(W*.82-90,Hh*.16-sy*.05-90,180,180);
+  const F=[.12,.28,.5],C=["#0b0d14","#10141f","#161c2b"];
+  ly.forEach((a,l)=>{const sh=((cam*F[l])%a.T+a.T)%a.T;a.forEach(b=>{let x=b.x-sh;if(x<-b.w)x+=a.T;if(x>W)return;cx.fillStyle=C[l];cx.fillRect(x,rt-b.h,b.w,b.h+8);if(l>0){for(let wy=rt-b.h+8;wy<rt-8;wy+=11)for(let wx=x+5;wx<x+b.w-6;wx+=9){const v=Math.sin(wx*12.9+wy*7.7+b.s*50+Math.floor(t/3+b.s*9))*.5+.5;if(v>.62){cx.fillStyle=v>.9?"rgba(255,214,10,.85)":"rgba(255,214,10,.35)";cx.fillRect(wx,wy,3.5,4.5)}}}})});
+  cx.fillStyle="#121622";cx.fillRect(0,rt-14,W,14);
+  for(let x=-((cam*1)%320);x<W+320;x+=320){cx.fillStyle="#1c2233";cx.fillRect(x,rt-62,2.5,50);cx.fillRect(x,rt-62,14,2.5);const lg=cx.createRadialGradient(x+14,rt-58,1,x+14,rt-58,50);lg.addColorStop(0,"rgba(255,214,10,.35)");lg.addColorStop(1,"rgba(255,214,10,0)");cx.fillStyle=lg;cx.fillRect(x-40,rt-110,110,110)}
+  cx.fillStyle="#090a10";cx.fillRect(0,rt,W,150);cx.fillStyle="#0e111a";cx.fillRect(0,rt+150,W,40);
+  cx.strokeStyle="rgba(255,255,255,.25)";cx.lineWidth=2.5;cx.setLineDash([32,24]);cx.lineDashOffset=(cam*1)%56;[rt+50,rt+100].forEach(y=>{cx.beginPath();cx.moveTo(0,y);cx.lineTo(W,y);cx.stroke()});cx.setLineDash([]);
   const span=W+300;cars.forEach(c=>{const x=(((c.k*span/5+dist[c.l])%span)+span)%span-150,sc=[.88,1,1.14][c.l];car(c,x,rt+LY[c.l]*150,sc)})}
  function frame(now){const dt=Math.min(.05,(now-last)/1000||0);last=now;VEL*=.94;const pOn=$("plan")&&$("plan").classList.contains("on");if(pOn&&scrollY<Hh+80&&!document.hidden){const sp=1+Math.min(Math.abs(VEL),3000)/320;off+=dt*60*sp;LS.forEach((v,i)=>dist[i]+=v*sp*dt);draw(now/1000)}requestAnimationFrame(frame)}
  return{start(){size();addEventListener("resize",size);requestAnimationFrame(frame)}}})();
@@ -214,16 +214,16 @@ const AREA=n=>n.lat>13.04?"North":n.lat<12.93&&n.lng<77.6?"South-West":n.lat<12.
 /* ---------- run ---------- */
 const STEPS=[["1 Collect","D2 form · D3 slot · D4 graph"],["2 Preprocess","Snap places · align slots"],["3 Estimate","D1 baseline × weather × D3"],["4 Diagnose","Rank sections by delay"],["5 Guide","What-if + nearby-road check"]];
 async function run(anim){const msg=$("msg");
- if(!SEL.src||!SEL.dst){const q=!SEL.src?"src":"dst";msg.innerHTML=`<div class="card err rv"><b>Please pick both places from the suggestions</b> (or press Enter to search a new place online).</div>`;reveal(msg);$(q).focus();return}
- if(SEL.src===SEL.dst){msg.innerHTML=`<div class="card err rv"><b>Source and destination are the same place.</b> Please choose a different destination.</div>`;reveal(msg);$("out").style.display="none";return}
- if(!$("tm").value){msg.innerHTML=`<div class="card err rv"><b>Please enter a departure time.</b></div>`;reveal(msg);return}
+ if(!SEL.src||!SEL.dst){const q=!SEL.src?"src":"dst";msg.innerHTML=`<div class="alert err"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span><b>Please pick both places</b> from suggestions (or press Enter to search).</span></div>`;reveal(msg);$(q).focus();return}
+ if(SEL.src===SEL.dst){msg.innerHTML=`<div class="alert err"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span><b>Origin and destination are identical.</b> Please select a different destination.</span></div>`;reveal(msg);$("out").style.display="none";return}
+ if(!$("tm").value){msg.innerHTML=`<div class="alert err"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span><b>Please enter a departure time.</b></span></div>`;reveal(msg);return}
  msg.innerHTML="";const out=$("out");
  if(anim){out.style.display="none";const p=$("pipe");p.classList.add("on");$("pst").innerHTML=STEPS.map(s=>`<div class="ps"><b>${s[0]}</b><small>${s[1]}</small></div>`).join("");$("mapsec").scrollIntoView({behavior:"smooth",block:"start"});
   let _i=0;for(const el of $("pst").children){pbSet(_i++);el.classList.add("on");await new Promise(r=>setTimeout(r,330));el.classList.remove("on");el.classList.add("done")}p.classList.remove("on");pbSet(5)}
  compute(anim)}
 function compute(anim){const [hh,mm]=$("tm").value.split(":").map(Number),st=hh+mm/60,mode=$("mode").value,live=$("live").checked,s=nodeIx(SEL.src),d=nodeIx(SEL.dst);
  C={we:$("day").value==="we",wx:$("wx").value,inc:""};let es=path(s,d,st,C,live,null);
- if(!es){$("msg").innerHTML=`<div class="card err"><b>No route found</b> between these places.</div>`;return}
+ if(!es){$("msg").innerHTML=`<div class="alert err"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span><b>No route found</b> between these places.</span></div>`;return}
  let incTxt="";if($("inc").checked){const m=es[Math.floor(es.length/2)];C.inc=m.key;incTxt=N[m.a].n+" → "+N[m.to].n;es=path(s,d,st,C,live,null)}
  const cur=evalP(es,st,mode,C,live),prim={rows:cur.rows,keys:cur.keys};
  const pen=new Set(cur.keys);let ae=path(s,d,st,C,live,pen),alt=null;if(ae&&ae.some(e=>!cur.keys.has(e.key))){const r=evalP(ae,st,mode,C,live,prim);alt={es:ae,r}}
@@ -330,6 +330,13 @@ function setup(){ac("src");ac("dst");const bs=[...document.querySelectorAll("#na
   if(qs&&qd){
     const sn=N.find(n=>n.n.toLowerCase().includes(qs.toLowerCase())),dn=N.find(n=>n.n.toLowerCase().includes(qd.toLowerCase()));
     if(sn&&dn){SEL.src=sn;SEL.dst=dn;$("src").value=sn.n;$("dst").value=dn.n;$("src").classList.add("ok");$("dst").classList.add("ok");setTimeout(()=>run(true),350)}
+  } else {
+    const sn=N.find(n=>n.n==="Indiranagar"),dn=N.find(n=>n.n.includes("ITPL"));
+    if(sn&&dn){
+      SEL.src=sn;SEL.dst=dn;
+      $("src").value=sn.n;$("dst").value=dn.n;
+      $("src").classList.add("ok");$("dst").classList.add("ok");
+    }
   }
  }catch(err){}
  if(window.Motion&&Motion.animate){try{Motion.animate(".brand,.live div,.form",{opacity:[0,1],y:[14,0]},{duration:0.55,delay:Motion.stagger(0.06),easing:[0.22,1,0.36,1]})}catch(err){}}
