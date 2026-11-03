@@ -1708,6 +1708,7 @@ tr.hl td { background: rgba(0, 113, 227, 0.15); }
 }
 .leaflet-bar a:hover { background: var(--apple-blue) !important; }
 .leaflet-container { font-family: inherit; background: #090a10; }
+.leaflet-div-icon { background: transparent !important; border: none !important; }
 
 .leaflet-bottom.leaflet-right {
   bottom: 20px;

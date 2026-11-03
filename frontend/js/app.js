@@ -123,6 +123,8 @@ function evalP(es,st,mode,c,live,prim){let clk=st,tot=0,fr=0,dist=0,ok=true,rows
 const nodeIx=o=>N.indexOf(o);
 /* ---------- v3: map (Leaflet) ---------- */
 const MW=620,MH=790,px=n=>[0,0];
+const ll=n=>[n.lat,n.lng];
+const sn=n=>(n&&n.n?n.n:(typeof n==="string"?n:"")).split(" (")[0];
 let MAP,BL={},OV,CB="night",VR=0,tWarn=false,VEL=0;
 const BCOL={normal:"#e6ecf2",night:"#0b1a30",sat:"#1b2a1f"};
 function initMap(){
@@ -142,7 +144,7 @@ function setBase(k){if(k===CB)return;const mw=$("mapw");mw.style.opacity=.2;setT
 function nClick(n){if(!SEL.src||(SEL.src&&SEL.dst))pick("src",n),SEL.dst=null,$("dst").value="",$("dst").classList.remove("ok");else pick("dst",n);toast((SEL.dst?"Destination":"Source")+" set: "+n.n)}
 function fitBox(es){if(!es.length)return[];return L.latLngBounds(es.flatMap(e=>[[N[e.a].lat,N[e.a].lng],[N[e.to].lat,N[e.to].lng]]))}
 function zoomTo(t){if(!MAP)return;MAP.invalidateSize();Array.isArray(t)?MAP.flyTo([12.97,77.62],11,{duration:1.2}):MAP.flyToBounds(t,{padding:[90,90],maxZoom:14,duration:1.2})}
-function drawMap(r,q){if(!MAP)return;cancelAnimationFrame(VR);OV.clearLayers();const dk=CB!=="normal",ll=n=>[n.lat,n.lng],sn=n=>n.n.split(" (")[0];
+function drawMap(r,q){if(!MAP)return;cancelAnimationFrame(VR);OV.clearLayers();const dk=CB!=="normal";
  const seen=new Set();AD.forEach(m=>m.forEach(e=>{if(e.art&&!seen.has(e.key)){seen.add(e.key);L.polyline([ll(N[e.a]),ll(N[e.to])],{color:CB==="sat"?"#fff":dk?"#7f9cc6":"#5b7aa6",weight:3,opacity:CB==="sat"?.5:.55,interactive:false}).addTo(OV)}}));
  const onR=new Set(r?r.es.flatMap(e=>[N[e.a].n,N[e.to].n]):[]);
  N.forEach(n=>{const on=onR.has(n.n);if(SEL.src===n||SEL.dst===n)return;const m=L.circleMarker(ll(n),{radius:on?5.5:3.8,color:dk?"#fff":"#0b1730",weight:1.5,fillColor:on?"#fff":(dk?"#9fb8d9":"#1d4f91"),fillOpacity:1}).addTo(OV);m.bindTooltip(sn(n),{className:"lt",direction:"top",offset:[0,-4],permanent:!!(on&&r&&onR.size<=9)});m.on("click",()=>nClick(n))});
@@ -195,9 +197,19 @@ function speakNav(text){
 }
 
 function startNav(){
-  if(!RES||!RES.es||!RES.es.length){toast("Analyse a trip first to start navigation");return}
+  if(!RES||!RES.es||!RES.es.length){
+    if(SEL.src&&SEL.dst){
+      toast("Calculating optimal route and launching navigation…");
+      run(true);
+      setTimeout(()=>{if(RES&&RES.es&&RES.es.length) startNav();},500);
+      return;
+    }
+    toast("Analyse a trip first to start navigation");
+    return;
+  }
   NAV_ACTIVE=true;NAV_PAUSED=false;NAV_STEP_IDX=0;NAV_STEP_PROG=0;
   if($("nav-play-icon")) $("nav-play-icon").textContent="⏸";
+  cancelAnimationFrame(VR);
 
   const es=RES.es,rows=RES.cur.rows,pts=[ll(N[es[0].a])].concat(es.map(e=>ll(N[e.to])));
   NAV_STEPS=[];let prevB=0;
@@ -208,12 +220,13 @@ function startNav(){
     prevB=b;
     NAV_STEPS.push({p1,p2,bearing:b,len:rows[i].len,mins:rows[i].mins,cg:rows[i].cg,street,arrow:m.arrow,action:m.action,desc:m.street});
   }
-  NAV_STEPS.push({p1:pts[pts.length-1],p2:pts[pts.length-1],bearing:prevB,len:0,mins:0,cg:0,street:SEL.dst.n.split(" (")[0],arrow:"🏁",action:"You have arrived",desc:SEL.dst.n.split(" (")[0]});
+  NAV_STEPS.push({p1:pts[pts.length-1],p2:pts[pts.length-1],bearing:prevB,len:0,mins:0,cg:0,street:sn(SEL.dst),arrow:"🏁",action:"You have arrived",desc:sn(SEL.dst)});
   NAV_TOTAL_DIST=RES.cur.dist;NAV_TOTAL_TIME=RES.cur.tot;
 
   $("mapc").classList.add("nav-active");
   $("nav-overlay").style.display="block";
   $("mapsec").scrollIntoView({behavior:"smooth",block:"start"});
+  setTimeout(()=>{if(MAP) MAP.invalidateSize();},120);
 
   if(NAV_CAR_MARKER&&MAP) MAP.removeLayer(NAV_CAR_MARKER);
   const startPt=NAV_STEPS[0].p1;
@@ -235,7 +248,7 @@ function startNav(){
   NAV_CAR_MARKER=L.marker(startPt,{
     icon:L.divIcon({className:"",html:carHtml,iconSize:[48,48],iconAnchor:[24,24]}),
     zIndexOffset:2000
-  }).addTo(OV);
+  }).addTo(MAP);
 
   MAP.flyTo(startPt,16,{duration:1});
   updateNavUI();
@@ -252,6 +265,7 @@ function stopNav(){
   if(NAV_CAR_MARKER&&MAP){MAP.removeLayer(NAV_CAR_MARKER);NAV_CAR_MARKER=null}
   $("mapc").classList.remove("nav-active");
   $("nav-overlay").style.display="none";
+  setTimeout(()=>{if(MAP) MAP.invalidateSize();},120);
   if(RES) zoomTo(fitBox(RES.es));
   toast("Navigation ended");
 }
@@ -357,8 +371,9 @@ function navTick(){
     if(bubble) bubble.textContent=cur.street;
   }
 
-  if(Math.random()<0.25){
-    MAP.panTo([lat,lng],{animate:true,duration:0.3});
+  if(!MAP._navLastPan||(Date.now()-MAP._navLastPan>1200)){
+    MAP._navLastPan=Date.now();
+    MAP.panTo([lat,lng],{animate:true,duration:0.8});
   }
 
   updateNavUI();
@@ -406,7 +421,7 @@ function v3init(){tick();sync();setInterval(tick,1000);setInterval(sync,5000);RD
  $("now").onclick=()=>{const d=ist(),m=Math.round(d.h*12)*5,hh=Math.floor(m/60)%24;$("tm").value=String(hh).padStart(2,"0")+":"+String(m%60).padStart(2,"0");$("day").value=d.we?"we":"wd";toast("Departure set to live IST time "+$("tm").value+(d.we?" (weekend)":" (weekday)"));if(SEL.src&&SEL.dst)run(true)};
  addEventListener("resize",()=>{bPill();pillTo(document.querySelector("#nav .on"))})}
 /* ---------- autocomplete ---------- */
-const toast=m=>{const t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("on"),3400)};
+function toast(m){const t=$("toast");if(!t)return;t.textContent=m;t.classList.add("on");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("on"),3400);}
 function pick(role,n){SEL[role]=n;$(role).value=n.n;$(role).classList.add("ok");$(role+"L").classList.remove("on");drawMap(null);if(SEL.src&&SEL.dst&&role){const a=px(SEL.src),b=px(SEL.dst);zoomTo(fitBox([{a:nodeIx(SEL.src),to:nodeIx(SEL.dst)}]),700)}else zoomTo([0,0,MW,MH],700)}
 async function online(role,q){toast("Searching OpenStreetMap for “"+q+"”…");try{const r=await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&viewbox=77.40,13.25,77.85,12.75&bounded=1&q="+encodeURIComponent(q+", Bengaluru"));const j=await r.json();if(!j.length){toast("No match found inside Bengaluru. Try a nearby locality.");return}
  const lat=+j[0].lat,lng=+j[0].lon;if(lat<12.78||lat>13.23||lng<77.45||lng>77.82){toast("That place is outside the Bengaluru area covered.");return}addCustom(role,q.replace(/\b\w/g,c=>c.toUpperCase()),lat,lng)}catch(e){toast("Online search needs an internet connection. Pick a place from the suggestions.")}}
