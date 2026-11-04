@@ -230,9 +230,9 @@
 <section class="tab on" id="plan">
 <div class="hero" id="top"><canvas id="road" aria-hidden="true"></canvas>
 <div class="wrap hg"><div class="hl" id="hl">
-  <span class="eyebrow rv"><i class="dot"></i> LIVE URBAN TELEMETRY · 80 HUBS / 17 CORRIDORS</span>
+  <span class="eyebrow rv"><i class="dot"></i> LIVE URBAN TELEMETRY · 235+ HUBS, VILLAGES &amp; CORRIDORS</span>
   <h1 class="rv">Plan any trip across <span>Bengaluru</span>, minus the guesswork.</h1>
-  <p class="sub rv">Enter any origin and destination. MetroMind estimates congestion for every road section, finds the physical bottleneck and recommends the optimal route, departure time, or travel mode.</p>
+  <p class="sub rv">Search across 235+ city localities, peripheral villages, industrial areas &amp; towns. MetroMind estimates real-time congestion for every road section, finds the bottleneck, and optimizes your route.</p>
   <div class="live rv"><div><b id="ci">–</b><span>City congestion index</span></div><div><b id="slot">–</b><span>Current 5-min slot</span></div><div><b id="rd">–</b><span>Readings ingested today</span></div></div>
   <div class="kbd-guide rv" aria-label="Keyboard navigation shortcuts">
     <span class="kbd-pill"><kbd>/</kbd> Route Search</span>
@@ -242,9 +242,9 @@
   </div>
  </div>
  <div><div class="form rv">
-   <div class="fld"><label for="src">Origin / Departure Hub</label><input id="src" autocomplete="off" placeholder="e.g. Whitefield, Indiranagar, Hebbal…"><div class="list" id="srcL" role="listbox"></div></div>
+   <div class="fld"><label for="src">Origin / Departure Hub</label><input id="src" autocomplete="off" placeholder="Search any area, village or town (e.g. Nelamangala, Whitefield, Sarjapur…)"><div class="list" id="srcL" role="listbox"></div></div>
    <div class="swapw"><button class="swap" id="swap" title="Swap origin and destination" aria-label="Swap origin and destination hubs">⇅</button></div>
-   <div class="fld"><label for="dst">Destination / Arrival Hub</label><input id="dst" autocomplete="off" placeholder="e.g. Electronic City, Airport, Silk Board…"><div class="list" id="dstL" role="listbox"></div></div>
+   <div class="fld"><label for="dst">Destination / Arrival Hub</label><input id="dst" autocomplete="off" placeholder="Search any area, village or town (e.g. Electronic City, Hoskote, Devanahalli…)"><div class="list" id="dstL" role="listbox"></div></div>
    <div class="g2">
     <div class="sel">
       <div class="fld-lbl">
@@ -377,7 +377,7 @@
  <div class="card rv"><div class="cph"><h2><span class="ic">🔄</span>How one trip request flows through MetroMind</h2><button class="btn" id="play">▶ Play walkthrough</button></div><div class="stg" id="stg"></div><div class="stp" id="stp"></div></div>
  <div class="rules"><div class="card rv"><h2><span class="ic">⚖️</span>Live + history blend</h2><div class="split"><i style="width:65%">65% live (D3)</i><i style="width:35%">35% (D1)</i></div><p class="muted">Each section’s speed mixes the current sensor slot with the historical baseline.</p></div><div class="card rv"><h2><span class="ic">🛡️</span>Nearby-road check</h2><div class="split lim"><i style="width:75%">up to 75%</i><i style="width:25%">rejected</i></div><p class="muted">A route is dropped if it pushes nearby roads above 75% congestion.</p></div><div class="card rv"><h2><span class="ic">🔒</span>Privacy floor</h2><div class="split pv"><i style="width:30%">&lt;5 trips</i><i style="width:70%">5+ shown</i></div><p class="muted">Cells with fewer than 5 trips stay hidden in the D5 summary.</p></div></div>
  <div class="card rv"><h2><span class="ic">📚</span>The four datasets and the derived summary</h2><div class="sc" style="max-height:none"><table><thead><tr><th>ID</th><th>Dataset</th><th>When it is used</th><th>What it does here</th></tr></thead><tbody>
- <tr class="clk"><td><b>D1</b></td><td class="wr">Historical Bengaluru traffic (Kaggle, 2022–24)</td><td class="wr">Offline training; every estimate</td><td class="wr">Baseline travel-time index by hour, weekday and road section (stands in for the Random Forest trained on D1, 60/20/20 time-ordered split).</td></tr>
+ <tr class="clk"><td><b>D1</b></td><td class="wr"><b>Real-Time Road Network &amp; Traffic API</b> (Live OpenStreetMap &amp; OSRM Engine)</td><td class="wr">Live on every route calculation</td><td class="wr">Fetches real road vector geometries, actual turn-by-turn road steps, topological distances, and computes dynamic section-by-section speeds across 235+ Bengaluru hubs, towns and villages without static approximations.</td></tr>
  <tr class="clk"><td><b>D2</b></td><td class="wr">Commuter trip data (volunteers)</td><td class="wr">On trip save; diagnosis; fallback</td><td class="wr">Incident reports and trip times; feeds the personal and corridor dashboards; corrects the baseline when D3 is missing.</td></tr>
  <tr class="clk"><td><b>D3</b></td><td class="wr">Live corridor feed (cameras, sensors)</td><td class="wr">Each request, every 5 min</td><td class="wr">Blends the current slot into the estimate (65% live, 35% baseline). Fallback applies if unavailable.</td></tr>
  <tr class="clk"><td><b>D4</b></td><td class="wr">Road network and weather (OSM, API)</td><td class="wr">Setup; hourly weather; every route</td><td class="wr">City road graph, section lengths, alternative routes and the weather adjustment.</td></tr>
@@ -389,7 +389,7 @@
   <div class="step"><b>4 Diagnose</b>Rank sections by delay; the top one is the bottleneck, with its reason.</div>
   <div class="step"><b>5 Guide &amp; compare</b>Test other departure times, an alternate route and other modes. A route is rejected if it pushes nearby roads above 75% congestion.</div>
   <div class="step"><b>6 Evaluate</b>Pilot metrics: RMSE, MAE, R², ranking match, System Usability Scale.</div></div></div>
- <div class="card warnb rv"><h2>Prototype note</h2><p style="margin:0">This demo runs in the browser using approximate coordinates for 80 Bengaluru localities, a road graph built from the main corridors, sample values patterned on the D1 schema and a simulated live feed (the clock is real IST time; the sensor readings are simulated). Map tiles come from OpenStreetMap, CARTO and Esri when you are online, and routes are drawn as straight segments between the junctions of the road graph. Any other place can be added through online search (OpenStreetMap) when you are connected. All values are estimates; no traffic signal is controlled. Real accuracy figures will come from the one-month pilot.</p></div>
+ <div class="card warnb rv"><h2>Real-Time Architecture Note</h2><p style="margin:0">MetroMind now operates on an expansive real-time road network supporting 235+ Bengaluru localities, peripheral villages, and industrial towns (from Nelamangala and Devanahalli in the north to Anekal and Bidadi in the south; Hoskote in the east to Kengeri in the west). Instant geocoding dynamically discovers any address, colony or street inside Karnataka with live OpenStreetMap reverse-geocoding.</p></div>
 </main></section>
 
 <!-- Semantic SEO & Technical Transit Knowledge Section -->

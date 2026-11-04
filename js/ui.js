@@ -107,14 +107,14 @@ function setupNav() {
 /* ════════════════════════════════════════════════════════════════
    AUTOCOMPLETE
    ════════════════════════════════════════════════════════════════ */
-/** Bengaluru area label for a node */
+/** Bengaluru area or category label for a node */
 const areaOf = n =>
-  n.lat > 13.04  ? "North"
+  n.cat || (n.lat > 13.04  ? "North"
   : n.lat < 12.93 && n.lng < 77.6 ? "South-West"
   : n.lat < 12.93 ? "South"
   : n.lng > 77.66 ? "East"
   : n.lng < 77.56 ? "West"
-  : "Central";
+  : "Central");
 
 function pick(role, node) {
   SEL[role] = node;
@@ -134,15 +134,15 @@ async function onlineSearch(role, query) {
   toast(`Searching OpenStreetMap for "${query}"…`);
   try {
     const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1`
-              + `&viewbox=77.40,13.25,77.85,12.75&bounded=1`
-              + `&q=${encodeURIComponent(query + ", Bengaluru")}`;
+              + `&viewbox=77.10,13.45,78.05,12.50&bounded=1`
+              + `&q=${encodeURIComponent(query + ", Karnataka")}`;
     const res = await fetch(url);
     const json = await res.json();
-    if (!json.length) { toast("No match found inside Bengaluru. Try a nearby locality."); return; }
+    if (!json.length) { toast("No match found. Try a nearby locality or village."); return; }
 
     const lat = +json[0].lat, lng = +json[0].lon;
-    if (lat < 12.78 || lat > 13.23 || lng < 77.45 || lng > 77.82) {
-      toast("That place is outside the Bengaluru area covered."); return;
+    if (lat < 12.50 || lat > 13.50 || lng < 77.10 || lng > 78.10) {
+      toast("That place is outside the Bengaluru region."); return;
     }
     addCustomNode(role, query.replace(/\b\w/g, c => c.toUpperCase()), lat, lng);
   } catch {
@@ -154,7 +154,7 @@ function addCustomNode(role, name, lat, lng) {
   // Remove previous custom node for this role
   const filtered = NODES.filter(n => n.cu !== role);
   NODES.length = 0; NODES.push(...filtered);
-  NODES.push({ n: name, lat, lng, w: 0.8, cu: role });
+  NODES.push({ n: name, lat, lng, w: 0.85, cu: role, cat: "Live OSM Match" });
   buildGraph();
 
   // Re-validate existing selections
@@ -166,7 +166,40 @@ function addCustomNode(role, name, lat, lng) {
 
 function setupAutocomplete(role) {
   const inp = $(role), box = $(role + "L");
-  let active = -1, items = [];
+  let active = -1, items = [], onlineItems = [];
+  let debounceTimer = null;
+
+  const renderDropdown = () => {
+    let html = "";
+    if (items.length) {
+      html += `<div style="padding:6px 12px;font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;background:#f3f7fa;border-bottom:1px solid #e2eaf1;">Bengaluru Localities &amp; Villages</div>`;
+      items.forEach((n, i) => {
+        html += `<div data-i="${i}" data-src="local" style="padding:8px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f2f5f8;">
+          <div><b style="color:#0f1b2d">${n.n}</b><br><small style="color:var(--mut)">${areaOf(n)}</small></div>
+          <span style="font-size:10.5px;padding:2px 8px;border-radius:10px;font-weight:600;background:#e0f2fe;color:#0284c7">${n.cat || "Area"}</span>
+        </div>`;
+      });
+    }
+    if (onlineItems.length) {
+      html += `<div style="padding:6px 12px;font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;background:#f3f7fa;border-bottom:1px solid #e2eaf1;">Live OpenStreetMap Matches</div>`;
+      onlineItems.forEach((n, i) => {
+        html += `<div data-i="${i}" data-src="online" style="padding:8px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f2f5f8;">
+          <div><b style="color:#0f1b2d">${n.n}</b><br><small style="color:var(--mut)">${n.sub || "Live Match"}</small></div>
+          <span style="font-size:10.5px;padding:2px 8px;border-radius:10px;font-weight:600;background:#fae8ff;color:#a21caf">Live OSM</span>
+        </div>`;
+      });
+    }
+
+    const q = inp.value.trim();
+    if (q && !items.some(n => n.n.toLowerCase() === q.toLowerCase())) {
+      html += `<div data-i="o" style="padding:9px 13px;cursor:pointer;background:#fafcfd;color:var(--teal2);font-weight:600;border-top:1px solid #e2eaf1">
+        <span>🔎 Search "${q}" across all Karnataka on OpenStreetMap</span>
+      </div>`;
+    }
+
+    box.innerHTML = html;
+    box.classList.add("on");
+  };
 
   const show = () => {
     const q = inp.value.trim().toLowerCase();
@@ -176,28 +209,52 @@ function setupAutocomplete(role) {
     items = q
       ? NODES.filter(n => n.n.toLowerCase().includes(q))
               .sort((a, b) => a.n.toLowerCase().indexOf(q) - b.n.toLowerCase().indexOf(q))
-      : NODES.filter(n => n.w >= 1.1);
-    items = items.slice(0, 8);
+      : NODES.slice(0, 14);
+    items = items.slice(0, 10);
     active = -1;
+    renderDropdown();
 
-    const onlineOpt = (q && !items.some(n => n.n.toLowerCase() === q))
-      ? `<div data-i="o"><span>🔎 Search "${inp.value.trim()}" online</span><small>OpenStreetMap</small></div>`
-      : "";
-
-    box.innerHTML = items.map((n, i) =>
-      `<div data-i="${i}"><span>${n.n}</span><small>${n.cu ? "online result" : areaOf(n)}</small></div>`
-    ).join("") + onlineOpt;
-    box.classList.add("on");
+    // Live geocoding query as user types
+    if (q.length >= 2) {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(async () => {
+        try {
+          const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lat=12.9716&lon=77.5946&limit=6`);
+          const json = await res.json();
+          onlineItems = (json.features || []).map(f => {
+            const p = f.properties;
+            const nm = p.name || p.street || q;
+            const sub = [p.county, p.state].filter(Boolean).join(", ");
+            const [lng, lat] = f.geometry.coordinates;
+            return { n: nm, lat, lng, sub, cat: "Live Match", w: 0.85, cu: role };
+          }).filter(x => x.lat >= 12.50 && x.lat <= 13.50 && x.lng >= 77.10 && x.lng <= 78.10);
+          renderDropdown();
+        } catch {
+          // offline fallback
+        }
+      }, 200);
+    } else {
+      onlineItems = [];
+    }
   };
 
   inp.oninput  = show;
   inp.onfocus  = show;
-  inp.onblur   = () => setTimeout(() => box.classList.remove("on"), 180);
+  inp.onblur   = () => setTimeout(() => box.classList.remove("on"), 220);
 
   box.onmousedown = e => {
     const d = e.target.closest("[data-i]");
     if (!d) return;
-    d.dataset.i === "o" ? onlineSearch(role, inp.value.trim()) : pick(role, items[+d.dataset.i]);
+    if (d.dataset.i === "o") {
+      onlineSearch(role, inp.value.trim());
+    } else if (d.dataset.src === "online") {
+      const chosen = onlineItems[+d.dataset.i];
+      if (chosen) {
+        addCustomNode(role, chosen.n, chosen.lat, chosen.lng);
+      }
+    } else {
+      pick(role, items[+d.dataset.i]);
+    }
   };
 
   inp.onkeydown = e => {
@@ -209,7 +266,15 @@ function setupAutocomplete(role) {
     } else if (e.key === "Enter") {
       e.preventDefault();
       const d = ds[active >= 0 ? active : 0];
-      if (d) d.dataset.i === "o" ? onlineSearch(role, inp.value.trim()) : pick(role, items[+d.dataset.i]);
+      if (d) {
+        if (d.dataset.i === "o") onlineSearch(role, inp.value.trim());
+        else if (d.dataset.src === "online") {
+          const chosen = onlineItems[+d.dataset.i];
+          if (chosen) addCustomNode(role, chosen.n, chosen.lat, chosen.lng);
+        } else if (items[+d.dataset.i]) {
+          pick(role, items[+d.dataset.i]);
+        }
+      }
       if (SEL.src && SEL.dst) setTimeout(() => runAnalysis(true), 50);
     }
   };
@@ -717,9 +782,11 @@ function setupTripSave() {
    ════════════════════════════════════════════════════════════════ */
 const EXAMPLES = [
   ["Whitefield", "Electronic City"],
+  ["Nelamangala", "MG Road"],
   ["Yelahanka",  "Jayanagar"],
+  ["Devanahalli", "Whitefield"],
   ["Kengeri",    "Indiranagar"],
-  ["Kempegowda Airport (BLR)", "MG Road"],
+  ["Hoskote",    "Sarjapur"],
   ["Hebbal",     "Silk Board"],
 ];
 

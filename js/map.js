@@ -34,8 +34,8 @@ let tweenHandle = null;
  * @returns {[number,number]}
  */
 export function project(node) {
-  const x = (node.lng - 77.47) / 0.33 * MAP_W;
-  const y = (13.21 - node.lat) / 0.41 * MAP_H;
+  const x = (node.lng - 77.20) / 0.70 * MAP_W;
+  const y = (13.38 - node.lat) / 0.88 * MAP_H;
   return [x, y];
 }
 
